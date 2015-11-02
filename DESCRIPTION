@@ -1,0 +1,30 @@
+Package: crudr
+Type: Package
+Title: Interfaces for CRUD operations
+Version: 0.1.0
+Date: 2015-11-02
+Authors@R: person("Janko", "Thyson", email = "janko.thyson@rappster.de",
+    role = c("aut", "cre"))
+Description: Provides generic interfaces that can be systematically
+    implemented for all contexts that match a CRUD paradigm (create, read,
+    update, delete).
+URL: https://github.com/rappster/crudr
+License: GPL-3
+LazyData: TRUE
+Imports:
+    R6,
+    settings
+Suggests:
+    knitr,
+    rmarkdown,
+    settings,
+    testthat
+VignetteBuilder: knitr
+Collate:
+    'interface_classes.R'
+    'base_classes.R'
+    'code.R'
+    'crudr-package.r'
+    'implementation_classes.R'
+    'uml.R'
+RoxygenNote: 5.0.0
