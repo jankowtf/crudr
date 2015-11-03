@@ -1,7 +1,7 @@
 Package: crudr
 Type: Package
 Title: Interfaces for CRUD operations
-Version: 0.1.3
+Version: 0.1.4
 Date: 2015-11-03
 Authors@R: person("Janko", "Thyson", email = "janko.thyson@rappster.de",
     role = c("aut", "cre"))
@@ -18,14 +18,15 @@ Suggests:
     knitr,
     rmarkdown,
     settings,
-    testthat
+    testthat,
+    microbenchmark
 VignetteBuilder: knitr
 Collate:
+    'access.R'
     'interface_classes.R'
     'base_classes.R'
     'code.R'
     'crudr-package.r'
     'implementation_classes.R'
     'uml.R'
-    'under_dev.R'
 RoxygenNote: 5.0.0
