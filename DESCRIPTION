@@ -27,4 +27,5 @@ Collate:
     'crudr-package.r'
     'implementation_classes.R'
     'uml.R'
+    'under_dev.R'
 RoxygenNote: 5.0.0
