@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Janko Thyson" />
+
+<meta name="date" content="2015-11-04" />
+
+<title>Nestedness</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<link href="data:text/css,body%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20max%2Dwidth%3A%20700px%3B%0A%20%20overflow%3A%20visible%3B%0A%20%20padding%2Dleft%3A%202em%3B%0A%20%20padding%2Dright%3A%202em%3B%0A%20%20font%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E35%3B%0A%7D%0A%0A%23header%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23TOC%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%200%200%2010px%2010px%3B%0A%20%20padding%3A%204px%3B%0A%20%20width%3A%20400px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20border%2Dradius%3A%205px%3B%0A%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%201%2E3%3B%0A%7D%0A%20%20%23TOC%20%2Etoctitle%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%20%20font%2Dsize%3A%2015px%3B%0A%20%20%20%20margin%2Dleft%3A%205px%3B%0A%20%20%7D%0A%0A%20%20%23TOC%20ul%20%7B%0A%20%20%20%20padding%2Dleft%3A%2040px%3B%0A%20%20%20%20margin%2Dleft%3A%20%2D1%2E5em%3B%0A%20%20%20%20margin%2Dtop%3A%205px%3B%0A%20%20%20%20margin%2Dbottom%3A%205px%3B%0A%20%20%7D%0A%20%20%23TOC%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dleft%3A%20%2D2em%3B%0A%20%20%7D%0A%20%20%23TOC%20li%20%7B%0A%20%20%20%20line%2Dheight%3A%2016px%3B%0A%20%20%7D%0A%0Atable%20%7B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20border%2Dstyle%3A%20outset%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0A%20%20border%2Dwidth%3A%202px%3B%0A%20%20padding%3A%205px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%20%20line%2Dheight%3A%2018px%3B%0A%20%20padding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Ap%20%7B%0A%20%20margin%3A%200%2E5em%200%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20padding%3A%200%2E25em%200%2E75em%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20border%2Dstyle%3A%20solid%3B%0A%20%20border%3A%20none%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23777%3B%0A%20%20margin%3A%2028px%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%20%20dl%20dd%20%7B%0A%20%20%20%20margin%2Dbottom%3A%2013px%3B%0A%20%20%20%20margin%2Dleft%3A%2013px%3B%0A%20%20%7D%0A%20%20dl%20dt%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%7D%0A%0Aul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%20%20ul%20li%20%7B%0A%20%20%20%20list%2Dstyle%3A%20circle%20outside%3B%0A%20%20%7D%0A%20%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dbottom%3A%200%3B%0A%20%20%7D%0A%0Apre%2C%20code%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20color%3A%20%23333%3B%0A%7D%0Apre%20%7B%0A%20%20white%2Dspace%3A%20pre%2Dwrap%3B%20%20%20%20%2F%2A%20Wrap%20long%20lines%20%2A%2F%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20margin%3A%205px%200px%2010px%200px%3B%0A%20%20padding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0A%20%20padding%3A%202px%200px%3B%0A%7D%0A%0Adiv%2Efigure%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20padding%3A%202px%3B%0A%20%20border%3A%201px%20solid%20%23DDDDDD%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20margin%3A%200%205px%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20font%2Dsize%3A%2035px%3B%0A%20%20line%2Dheight%3A%2040px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20padding%2Dbottom%3A%202px%3B%0A%20%20font%2Dsize%3A%20145%25%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20border%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20font%2Dsize%3A%20120%25%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0A%20%20margin%2Dleft%3A%208px%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Ah5%2C%20h6%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%230033dd%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%20%20a%3Ahover%20%7B%0A%20%20%20%20color%3A%20%236666ff%3B%20%7D%0A%20%20a%3Avisited%20%7B%0A%20%20%20%20color%3A%20%23800080%3B%20%7D%0A%20%20a%3Avisited%3Ahover%20%7B%0A%20%20%20%20color%3A%20%23BB00BB%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%0A%2F%2A%20Class%20described%20in%20https%3A%2F%2Fbenjeffrey%2Ecom%2Fposts%2Fpandoc%2Dsyntax%2Dhighlighting%2Dcss%0A%20%20%20Colours%20from%20https%3A%2F%2Fgist%2Egithub%2Ecom%2Frobsimmons%2F1172277%20%2A%2F%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Keyword%20%2A%2F%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%2F%2A%20DataType%20%2A%2F%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%2F%2A%20DecVal%20%28decimal%20values%29%20%2A%2F%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20BaseN%20%2A%2F%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Float%20%2A%2F%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Char%20%2A%2F%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20String%20%2A%2F%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%2F%2A%20Comment%20%2A%2F%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%2F%2A%20OtherToken%20%2A%2F%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20AlertToken%20%2A%2F%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Function%20calls%20%2A%2F%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%2F%2A%20ErrorTok%20%2A%2F%0A%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div id="header">
+<h1 class="title">Nestedness</h1>
+<h4 class="author"><em>Janko Thyson</em></h4>
+<h4 class="date"><em>2015-11-04</em></h4>
+</div>
+
+
+<div id="manage-nested-values" class="section level1">
+<h1>Manage nested values</h1>
+<pre class="sourceCode r"><code class="sourceCode r">(inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="kw">list</span>(<span class="dt">users =</span> <span class="kw">list</span>(<span class="dt">user_1 =</span> <span class="kw">list</span>(<span class="dt">name =</span> <span class="st">&quot;none&quot;</span>)))))
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;none&quot;</span>
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="kw">c</span>(<span class="st">&quot;github&quot;</span>, <span class="st">&quot;users&quot;</span>, <span class="st">&quot;user_1&quot;</span>, <span class="st">&quot;name&quot;</span>), 
+  <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
+<p>For your convenience, you can also supply the index as a string that is separated by <code>/</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r">(inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="kw">list</span>(<span class="dt">users =</span> <span class="kw">list</span>(<span class="dt">user_1 =</span> <span class="kw">list</span>(<span class="dt">name =</span> <span class="st">&quot;none&quot;</span>)))))
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;none&quot;</span>
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users/user_1/name&quot;</span>, 
+  <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
+<p>It is not yet possible to delete values again, but I’m working on this.</p>
+</div>
+<div id="bridging" class="section level1">
+<h1>Bridging</h1>
+<p>Say you started out with some idea of how your settings should look like, but decide you need to rearrange them. This typically involves the fact that you need to “bridge”, i.e. add branches that did not existed before in order to assign your value.</p>
+<p>The current default preserves existing values, but depending on the nature of the existing value (or its parent), you might not get the results you desire (typically you want the final result to be accessible via <code>$</code>)</p>
+<pre class="sourceCode r"><code class="sourceCode r">(inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="st">&quot;rappster&quot;</span>))
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/user&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>,
+  <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt;                  user </span>
+<span class="co">#&gt; &quot;rappster&quot; &quot;rappster&quot;</span></code></pre>
+<p>The value has been created, but it is not accessible via <code>$</code> (but via <code>[[</code>).</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">try</span>(inst$github$user)
+inst[[<span class="st">&quot;github&quot;</span>]][[<span class="st">&quot;user&quot;</span>]]
+<span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
+<p>But you typically do not (want to) care what the existing branch value was like when you introduced a new value. If so, you can run the following.</p>
+<pre class="sourceCode r"><code class="sourceCode r">inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="st">&quot;rappster&quot;</span>)
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/user&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>,
+  <span class="dt">in_parent =</span> <span class="ot">TRUE</span>, <span class="dt">use_tree =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github[[1]]</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $github$user</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
+<p>The value is now accessible via <code>$</code>.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">try</span>(inst$github$user)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="st">&quot;rappster&quot;</span>)</code></pre>
+<p>However, this comes at some computational costs as additional checks need to be performed before executing CRUD operations (see benchmark below).</p>
+<p>An extrem example of bridging:</p>
+<pre class="sourceCode r"><code class="sourceCode r">inst &lt;-<span class="st"> </span><span class="kw">list</span>()
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> letters, <span class="dt">value =</span> <span class="st">&quot;hello world!&quot;</span>, 
+  <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;hello world!&quot;</span>
+inst
+<span class="co">#&gt; $a</span>
+<span class="co">#&gt; $a$b</span>
+<span class="co">#&gt; $a$b$c</span>
+<span class="co">#&gt; $a$b$c$d</span>
+<span class="co">#&gt; $a$b$c$d$e</span>
+<span class="co">#&gt; $a$b$c$d$e$f</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u$v</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u$v$w</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u$v$w$x</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u$v$w$x$y</span>
+<span class="co">#&gt; $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$u$v$w$x$y$z</span>
+<span class="co">#&gt; [1] &quot;hello world!&quot;</span></code></pre>
+</div>
+<div id="some-benchmarks" class="section level1">
+<h1>Some benchmarks</h1>
+<pre class="sourceCode r"><code class="sourceCode r">inst &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">github =</span> <span class="kw">list</span>(<span class="dt">users =</span> <span class="kw">list</span>(<span class="dt">user_1 =</span> <span class="kw">list</span>(<span class="dt">name =</span> <span class="st">&quot;none&quot;</span>))))
+
+<span class="kw">library</span>(microbenchmark)
+<span class="kw">microbenchmark</span>(
+  <span class="st">&quot;1&quot;</span> =<span class="st"> </span><span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users/user_1/name&quot;</span>, 
+    <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>),
+  <span class="st">&quot;2&quot;</span> =<span class="st"> </span><span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users/user_1/name/a/b/c&quot;</span>, 
+    <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>, <span class="dt">use_tree =</span> <span class="ot">TRUE</span>)
+)
+<span class="co">#&gt; Unit: microseconds</span>
+<span class="co">#&gt;  expr     min      lq      mean   median       uq      max neval</span>
+<span class="co">#&gt;     1  33.429  39.588  46.59037  45.1590  47.5055  130.785   100</span>
+<span class="co">#&gt;     2 600.557 699.086 876.29780 875.6175 920.7760 2065.589   100</span></code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

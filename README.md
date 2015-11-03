@@ -29,10 +29,52 @@ require("crudr")
 
 ## Examples
 
+```
+inst <- Crud$new()
+inst$init(a = 1, b = 2)
+
+inst$has("a")
+inst$has("a", "b")
+inst$has("a", "b", "c")
+
+inst$read("a")
+inst$read("a", "b")
+inst$read("a", "b", "c")
+
+inst$create(x = 10)
+inst$read("x")
+inst$create(x = 100, y = 200)
+inst$read("x", "y")
+inst$create(x = 100, y = 200, overwrite = TRUE)
+inst$read("x", "y")
+
+inst$update(a = 10)
+inst$read("a")
+inst$update(a = 100, b = 200)
+inst$read("a", "b")
+inst$update(a = 1, abc = TRUE)
+## --> `abc` had not been created and can thus not be updated
+
+inst$delete("a")
+inst$has("a")
+inst$delete("b", "x")
+
+inst$read()
+inst$reset()
+inst$read()
+inst$reset("hard")
+inst$read()
+```
+
+## Further examples
+
 See vignettes: 
 
 - [Introduction](https://github.com/rappster/crudr/tree/master/vignettes/introduction.Rmd):
     Run `vignette("introduction", package = "crudr")`
   
-- [Implementation for `settings` package](https://github.com/rappster/crudr/tree/master/vignettes/impl_settings_package.Rmd):
+- [Implementation for package `settings`](https://github.com/rappster/crudr/tree/master/vignettes/impl_settings_package.Rmd):
     Run `vignette("impl_settings_package", package = "crudr")`
+    
+- [Nestedness](https://github.com/rappster/crudr/tree/master/vignettes/nestedness.Rmd):
+    Run `vignette("nestedness", package = "crudr")`    

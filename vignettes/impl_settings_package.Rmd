@@ -11,7 +11,7 @@ vignette: >
 
 ```{r, include = FALSE}
 library(crudr)
-stand_alone_mode <- TRUE
+stand_alone <- TRUE
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 ```
 
@@ -53,13 +53,13 @@ uml_file <- crudr:::plantuml3(crudr_uml, 'Architecture', filename = "uml")
 
 # Instantiate 
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst <- Crud.Settings$new()
 ```
 
 # Init
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$init(a = 1, b = 2)
 inst$getMain()
 ## --> this is actually the return value of calling 
@@ -69,7 +69,7 @@ inst$getMain()()
 
 # Has 
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$has("a")
 inst$has("b")
 inst$has("a", "b")
@@ -80,7 +80,7 @@ inst$has("a", "c")
 
 # Create
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$create(c = 3)
 inst$create(d = 4, f = 5)
 inst$read()
@@ -98,7 +98,7 @@ inst$read()
 
 # Read
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$read()
 inst$read("a")
 inst$read("a", "b")
@@ -109,7 +109,7 @@ try(inst$read("a", "b", "x", strict = 3))
 
 # Update
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$read("a")
 inst$update(a = 10)
 inst$read("a")
@@ -129,7 +129,7 @@ inst$read("a", "x")
 
 # Delete
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$read()
 inst$delete("f")
 
@@ -145,10 +145,11 @@ inst$read()
 
 # Reset
 
-```{r, eval = stand_alone_mode}
+```{r, eval = stand_alone}
 inst$reset()
 inst$read()
 
 inst$reset(type = "hard")
 inst$read()
 ```
+

@@ -1,3 +1,6 @@
+
+# createCrudExpression --------------------------------------------------
+
 #' @title
 #' Create access expression
 #'
@@ -12,36 +15,36 @@
 #' Known methods:
 #'
 #' \itemize{
-#'  \item{\code{\link[crudr]{createAccessExpression.default}}}
+#'  \item{\code{\link[crudr]{createCrudExpression.default}}}
 #' }
 #'
 #' For a faster but less comprehensive version see:
-#' \code{\link[crudr]{createAccessExpressionPlain}}
+#' \code{\link[crudr]{createCrudExpressionPlain}}
 #'
 #' @param inst Object for method dispatch.
 #' @template threedots
 #' @return See respective methods.
-#' @example inst/examples/example-createAccessExpression.R
+#' @example inst/examples/example-createCrudExpression.R
 #' @seealso \code{\link[base]{Extract}, \link[base]{assignOps}}
 #' @template authors
 #' @template references
 #' @export
-createAccessExpression <- function(inst, ...) {
-  UseMethod("createAccessExpression", inst)
+createCrudExpression <- function(inst, ...) {
+  UseMethod("createCrudExpression", inst)
 }
 
 #' @title
 #' Create access expression
 #'
 #' @description
-#' Default method of \code{\link[crudr]{createAccessExpression}}.
+#' Default method of \code{\link[crudr]{createCrudExpression}}.
 #'
 #' @details
 #' TODO
 #'
 #' @param inst \code{\link[base]{list}}.
 #'  TODO
-#' @param idx \code{\link[base]{character}}.
+#' @param id \code{\link[base]{character}}.
 #'  TODO
 #' @param value \code{ANY} (\code{\link[methods]{BasicClasses}}).
 #'  Optional assignment value.
@@ -50,55 +53,78 @@ createAccessExpression <- function(inst, ...) {
 #'  or assigned to.
 #' @param name_value \code{\link[base]{character}}.
 #'  TODO
+#' @param as_name_value \code{\link[base]{logical}}.
+#'  TODO
+#' @param in_parent \code{\link[base]{logical}}.
+#'  TODO
 #' @param evaluate \code{\link[base]{logical}}.
 #'  TODO
 #' @param sugar \code{\link[base]{character}}.
 #'  Syntactic sugar function to use.
 #' @param as_name_obj \code{\link[base]{logical}}.
 #'  TODO
-#' @param as_name_value \code{\link[base]{logical}}.
-#'  TODO
-#' @param eval_in_parent \code{\link[base]{logical}}.
-#'  TODO
 #' @param return_conventional \code{\link[base]{logical}}.
 #'  Only relevant if \code{!is.null(value)}. Return conventional return value
 #'  of assignments via \code{<-} or more plausible information in typical
 #'  contexts where this functions might be used. These are:
 #'  \itemize{
-#'    \item{updated object \code{inst} if \code{eval_in_parent = FALSE}}
-#'    \item{\code{NULL} if \code{eval_in_parent = TRUE} in order to stress the
+#'    \item{updated object \code{inst} if \code{in_parent = FALSE}}
+#'    \item{\code{NULL} if \code{in_parent = TRUE} in order to stress the
 #'    point that an object has been altered in the parent frame}
 #'  }
+#' @param strict \code{\link[base]{numeric}}.
+#'  Strictness levels:
+#'  \itemize{
+#'    \item{0: }{no condition is signaled}
+#'    \item{1: }{message is signaled}
+#'    \item{2: }{warning is signaled}
+#'    \item{3: }{error is signaled}
+#'  }
+#' @param fail_safe \code{\link[base]{logical}}.
+#'  Wrap with \code{\link[base]{try}}.
+#' @param use_tree \code{\link[base]{logical}}.
+#'  Use expression tree as returned by
+#'    \code{\link[crudr]{createCrudExpressionTree}}.
 #' @template threedots
 #' @return \code{\link[base]{expression}} or evaluated get expression
 #'  if \code{evaluate = TRUE}. Exact value also depends on
 #'  \code{return_conventional}
-#'  (in interaction with \code{value} and \code{eval_in_parent})
-#' @example inst/examples/example-createAccessExpression.R
-#' @seealso \code{\link[crudr]{createAccessExpression}}
+#'  (in interaction with \code{value} and \code{in_parent})
+#' @example inst/examples/example-createCrudExpression.R
+#' @seealso \code{\link[crudr]{createCrudExpression}}
 #' @template authors
 #' @template references
 #' @export
-createAccessExpression.default <- function(
+createCrudExpression.default <- function(
   inst,
-  idx = character(),
+  id = character(),
   value = NULL,
   name_obj = "inst",
   name_value = "value",
-  evaluate = FALSE,
-  sugar = c("[[", "$"),
   as_name_obj = TRUE,
   as_name_value = FALSE,
-  eval_in_parent = FALSE,
+  evaluate = FALSE,
+  sugar = c("[[", "$"),
+  in_parent = FALSE,
   return_conventional = TRUE,
+  strict = 0:3,
+  fail_safe = FALSE,
+  use_tree = FALSE,
   ...
 ) {
-  envir <- if (!eval_in_parent) {
+  envir <- if (!in_parent) {
     envir <- environment()
   } else {
     parent.frame()
   }
   sugar <- match.arg(sugar, c("[[", "$"))
+
+  if (in_parent) {
+    evaluate <- TRUE
+  }
+
+  ## Ensure vectorized index //
+  id <- unlist(strsplit(id, "/"))
 
   name_obj <- if (as_name_obj) as.name(name_obj) else inst
   name_value <- if (as_name_value) as.name(name_value) else value
@@ -107,23 +133,21 @@ createAccessExpression.default <- function(
     if (is.null(value)) {
       expr <- substitute(FUN(X, INDEX),
         list(FUN = as.name('[['), X = name_obj,
-          INDEX = idx))
+          INDEX = id))
     } else {
       expr <- substitute(FUN(X, INDEX) <- VALUE,
-        list(FUN = as.name('[['), X = name_obj, INDEX = idx,
+        list(FUN = as.name('[['), X = name_obj, INDEX = id,
           VALUE = name_value)
       )
     }
   } else if (sugar == "$") {
-    #       expr <- substitute(FUN(X, INDEX),
-    #         list(FUN = as.name('$'), X = as.name(name_obj), INDEX = idx))
-    for (ii in 1:length(idx)) {
+    for (ii in 1:length(id)) {
       if (ii == 1) {
         X <- name_obj
       } else {
         X <- expr
       }
-      INDEX <- idx[ii]
+      INDEX <- id[ii]
       expr <- substitute(FUN(X, INDEX),
         list(FUN = as.name('$'), X = X, INDEX = INDEX))
     }
@@ -135,12 +159,52 @@ createAccessExpression.default <- function(
     expr
   }
   if (evaluate) {
-    out <- eval(expr, envir = envir)
-    if (!is.null(value) && !return_conventional) {
-      out <- if (eval_in_parent) {
-        NULL
+    if (is.null(value)) {
+      ## --> get scenario
+      out <- if (!fail_safe) {
+        eval(expr, envir = envir)
       } else {
-        inst
+        try(eval(expr, envir = envir), silent = TRUE)
+      }
+    } else {
+      ## --> set scenario
+      if (!use_tree) {
+        out <- try(eval(expr, envir = envir), silent = TRUE)
+      } else {
+        out <- structure(NULL, class = "try-error")
+      }
+      if (inherits(out, "try-error")) {
+        applyStrictnessLevel(strict, "bridging required")
+
+        tree <- createCrudExpressionTree(
+          inst = inst,
+          id = id,
+          value = name_value,
+          name_obj = name_obj,
+          name_value = name_value,
+          fail_safe = TRUE
+        )
+        exists_idx <- applyCrudExpressionTree(tree, "exists",
+          fail_safe = TRUE)
+        # exists_idx <- applyCrudExpressionTree(tree, "get")
+        # print(exists_idx)
+        missing_idx <- sapply(exists_idx, function(ii) {
+          ## If via type = "exists":
+          identical(ii, FALSE) || inherits(ii, "try-error")
+          ## If via type = "get":
+          # is.null(ii) || inherits(ii, "try-error")
+        })
+        tree <- tree[missing_idx]
+        out <- applyCrudExpressionTree(tree, "set", envir = envir)
+        out <- out[[length(out)]]
+      }
+
+      if (!return_conventional) {
+        out <- if (in_parent) {
+          NULL
+        } else {
+          inst
+        }
       }
     }
     out
@@ -149,48 +213,50 @@ createAccessExpression.default <- function(
   }
 }
 
+# createCrudExpressionPlain ---------------------------------------------
+
 #' @title
 #' Create access expression
 #'
 #' @description
 #' Plain and thus faster version of
-#' \code{\link[crudr]{createAccessExpression}} for
+#' \code{\link[crudr]{createCrudExpression}} for
 #' scenarios where computational costs really matter.
 #'
 #' @details
 #' Known methods:
 #'
 #' \itemize{
-#'  \item{\code{\link[crudr]{createAccessExpressionPlain.default}}}
+#'  \item{\code{\link[crudr]{createCrudExpressionPlain.default}}}
 #' }
 #'
 #' For a more comprehensive but slower version see:
-#' \code{\link[crudr]{createAccessExpression}}
+#' \code{\link[crudr]{createCrudExpression}}
 #'
 #' @param inst Object for method dispatch.
 #' @template threedots
 #' @return See respective methods.
-#' @example inst/examples/example-createAccessExpressionPlain.R
+#' @example inst/examples/example-createCrudExpressionPlain.R
 #' @seealso \code{\link[base]{Extract}, \link[base]{assignOps}}
 #' @template authors
 #' @template references
 #' @export
-createAccessExpressionPlain <- function(inst, ...) {
-  UseMethod("createAccessExpressionPlain", inst)
+createCrudExpressionPlain <- function(inst, ...) {
+  UseMethod("createCrudExpressionPlain", inst)
 }
 
 #' @title
 #' Create access expression
 #'
 #' @description
-#' Default method of \code{\link[crudr]{createAccessExpressionPlain}}.
+#' Default method of \code{\link[crudr]{createCrudExpressionPlain}}.
 #'
 #' @details
 #' TODO
 #'
 #' @param inst \code{\link[base]{list}}.
 #'  TODO
-#' @param idx \code{\link[base]{character}}.
+#' @param id \code{\link[base]{character}}.
 #'  TODO
 #' @param value \code{ANY} (\code{\link[methods]{BasicClasses}}).
 #'  Optional assignment value.
@@ -199,28 +265,305 @@ createAccessExpressionPlain <- function(inst, ...) {
 #'  or assigned to.
 #' @template threedots
 #' @return \code{\link[base]{expression}}.
-#' @example inst/examples/example-createAccessExpressionPlain.R
+#' @example inst/examples/example-createCrudExpressionPlain.R
 #' @seealso \code{
-#'  \link[crudr]{createAccessExpressionPlain},
-#'  \link[crudr]{createAccessExpression}
+#'  \link[crudr]{createCrudExpressionPlain},
+#'  \link[crudr]{createCrudExpression}
 #' }
 #' @template authors
 #' @template references
 #' @export
-createAccessExpressionPlain.default <- function(
+createCrudExpressionPlain.default <- function(
   inst,
-  idx = character(),
+  id = character(),
   value = NULL,
   name = "inst",
   ...
 ) {
   if (is.null(value)) {
     substitute(FUN(X, INDEX),
-      list(FUN = as.name('[['), X = as.name(name), INDEX = idx))
+      list(FUN = as.name('[['), X = as.name(name), INDEX = id))
   } else {
     substitute(FUN(X, INDEX) <- VALUE,
-      list(FUN = as.name('[['), X = as.name(name), INDEX = idx,
+      list(FUN = as.name('[['), X = as.name(name), INDEX = id,
         VALUE = value)
     )
   }
+}
+
+# createCrudExpressionTree ----------------------------------------------
+
+#' @title
+#' Create access expression tree
+#'
+#' @description
+#' Creates a tree of access expression.
+#' See \code{\link[crudr]{createCrudExpression}}.
+#'
+#' @details
+#' Known methods:
+#'
+#' \itemize{
+#'  \item{\code{\link[crudr]{createCrudExpressionTree.default}}}
+#' }
+#'
+#' @param inst Object for method dispatch.
+#' @template threedots
+#' @return See respective methods.
+#' @example inst/examples/example-createCrudExpressionTree.R
+#' @seealso \code{\link[base]{Extract}, \link[base]{assignOps}}
+#' @template authors
+#' @template references
+#' @export
+createCrudExpressionTree <- function(inst, ...) {
+  UseMethod("createCrudExpressionTree", inst)
+}
+
+#' @title
+#' Create access expression tree
+#'
+#' @description
+#' Default method of \code{\link[crudr]{createCrudExpressionTree}}.
+#'
+#' @details
+#' TODO
+#'
+#' @param inst \code{\link[base]{list}}.
+#'  TODO
+#' @param id \code{\link[base]{character}}.
+#'  TODO
+#' @param value \code{ANY} (\code{\link[methods]{BasicClasses}}).
+#'  Optional assignment value.
+#' @param name_obj \code{\link[base]{character}}.
+#'  Name of the actual object in the expression that values are extracted from
+#'  or assigned to.
+#' @param name_value \code{\link[base]{character}}.
+#'  TODO
+#' @param as_name_obj \code{\link[base]{logical}}.
+#'  TODO
+#' @param as_name_value \code{\link[base]{logical}}.
+#'  TODO
+#' @param fail_safe \code{\link[base]{logical}}.
+#'  Wrap with \code{\link[base]{try}}.
+#' @template threedots
+#' @return \code{\link[base]{expression}}.
+#' @example inst/examples/example-createCrudExpressionTree.R
+#' @seealso \code{
+#'  \link[crudr]{createCrudExpressionTree}
+#' }
+#' @template authors
+#' @template references
+#' @export
+createCrudExpressionTree.default <- function(
+  inst,
+  id = character(),
+  value = NULL,
+  name_obj = "inst",
+  name_value = "value",
+  as_name_obj = TRUE,
+  as_name_value = FALSE,
+  fail_safe = FALSE,
+  ...
+) {
+  name_obj <- if (as_name_obj) as.name(name_obj) else inst
+  name_value <- if (as_name_value) as.name(name_value) else value
+
+  out <- lapply(1:length(id), function(ii) {
+    this <- id[1:ii]
+    WHERE <- if (ii == 1) {
+      name_obj
+    } else {
+      substitute(FUN(X, INDEX),
+        list(FUN = as.name('[['), X = name_obj,
+          INDEX = id[1:(ii - 1)])
+      )
+    }
+    value <- if (ii < length(id)) {
+      # list()
+      list()
+    } else {
+#       if (wrap_in_list) {
+#         list(name_value)
+#       } else {
+        name_value
+      # }
+    }
+    tmp <- list(
+      exists = if (!fail_safe) {
+        substitute(
+          FUN(X, WHERE, inherits = FALSE),
+          list(
+            FUN = as.name('exists'),
+            X = id[ii],
+            WHERE = WHERE
+          )
+        )
+      } else {
+        substitute(
+          try(FUN(X, WHERE, inherits = FALSE), silent = TRUE),
+          list(
+            FUN = as.name('exists'),
+            X = id[ii],
+            WHERE = WHERE
+          )
+        )
+      },
+      get = if (!fail_safe) {
+        substitute(
+          FUN(X, INDEX),
+          list(
+            FUN = as.name('[['),
+            X = name_obj,
+            INDEX = this
+          )
+        )
+      } else {
+        substitute(
+          try(FUN(X, INDEX), silent = TRUE),
+          list(
+            FUN = as.name('[['),
+            X = name_obj,
+            INDEX = this
+          )
+        )
+      },
+      set = if (!is.null(value)) {
+        if (!fail_safe) {
+          if (ii < length(id)) {
+            substitute(
+              {
+                FUN(X, INDEX) <- list(list())
+                FUN(X, INDEX) <- VALUE
+              },
+              list(
+                FUN = as.name('[['),
+                X = name_obj,
+                INDEX = this,
+                VALUE = value
+              )
+            )
+          } else {
+            substitute(
+              {
+                FUN(X, INDEX) <- list(list())
+                FUN(X, INDEX) <- VALUE
+              },
+              # FUN(X, INDEX) <- VALUE,
+              list(
+                FUN = as.name('[['),
+                X = name_obj,
+                INDEX = this,
+                VALUE = value
+              )
+            )
+          }
+        } else {
+          if (ii < length(id)) {
+            substitute(
+              {
+                try(FUN(X, INDEX) <- list(list()), silent = TRUE)
+                try(FUN(X, INDEX) <- VALUE, silent = TRUE)
+              },
+              list(
+                FUN = as.name('[['),
+                X = name_obj,
+                INDEX = this,
+                VALUE = value
+              )
+            )
+          } else {
+            substitute(
+              {
+                try(FUN(X, INDEX) <- list(list()), silent = TRUE)
+                try(FUN(X, INDEX) <- VALUE, silent = TRUE)
+              },
+              # try(FUN(X, INDEX) <- VALUE, silent = TRUE),
+              list(
+                FUN = as.name('[['),
+                X = name_obj,
+                INDEX = this,
+                VALUE = value
+              )
+            )
+          }
+        }
+      } else {
+        NULL
+      }
+    )
+    tmp
+  })
+  names(out) <- sapply(1:length(id), function(ii) paste(id[1:ii], collapse = "/"))
+  out
+}
+
+#' @title
+#' Apply access expression tree
+#'
+#' @description
+#' Applies a tree of access expressions.
+#' See \code{\link[crudr]{applyCrudExpressionTree}}.
+#'
+#' @details
+#' Known methods:
+#'
+#' \itemize{
+#'  \item{\code{\link[crudr]{applyCrudExpressionTree.default}}}
+#' }
+#'
+#' @param inst Object for method dispatch.
+#' @template threedots
+#' @return See respective methods.
+#' @example inst/examples/example-applyCrudExpressionTree.R
+#' @seealso \code{\link[crudr]{createCrudExpressionTree}}
+#' @template authors
+#' @template references
+#' @export
+applyCrudExpressionTree <- function(inst, ...) {
+  UseMethod("applyCrudExpressionTree", inst)
+}
+
+#' @title
+#' Apply access expression tree
+#'
+#' @description
+#' Default method of \code{\link[crudr]{applyCrudExpressionTree}}.
+#'
+#' @details
+#' TODO
+#'
+#' @param inst \code{\link[base]{list}}.
+#'  TODO
+#' @param type \code{\link[base]{character}}.
+#'  Type of expressions to apply.
+#' @param envir \code{\link[base]{environment}}.
+#'  Environment in which to evaluate the expressions.
+#' @param fail_safe \code{\link[base]{logical}}.
+#'  Wrap with \code{\link[base]{try}}.
+#' @template threedots
+#' @return \code{\link[base]{expression}}.
+#' @example inst/examples/example-applyCrudExpressionTree.R
+#' @seealso \code{
+#'  \link[crudr]{createCrudExpressionTree}
+#' }
+#' @template authors
+#' @template references
+#' @export
+applyCrudExpressionTree.default <- function(
+  inst,
+  type = c("exists", "get", "set"),
+  envir = parent.frame(),
+  fail_safe = FALSE,
+  ...
+) {
+  # print(ls(envir))
+  type <- match.arg(type, c("exists", "get", "set"))
+  # ii = inst[[2]]
+  lapply(inst, function(ii) {
+    if (!fail_safe) {
+      eval(ii[[type]], envir = envir)
+    } else {
+      try(eval(ii[[type]], envir = envir), silent = TRUE)
+    }
+  })
 }

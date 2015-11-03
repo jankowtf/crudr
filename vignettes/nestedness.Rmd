@@ -1,0 +1,99 @@
+---
+title: "Nestedness"
+author: "Janko Thyson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{README}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+library(crudr)
+stand_alone <- TRUE
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+# Manage nested values
+
+```{r, eval = stand_alone}
+(inst <- list(github = list(users = list(user_1 = list(name = "none")))))
+createCrudExpression(inst, id = c("github", "users", "user_1", "name"), 
+  value = "rappster", in_parent = TRUE)
+inst
+```
+
+For your convenience, you can also supply the index as a string that is separated by `/`:
+
+```{r, eval = stand_alone}
+(inst <- list(github = list(users = list(user_1 = list(name = "none")))))
+createCrudExpression(inst, id = "github/users/user_1/name", 
+  value = "rappster", in_parent = TRUE)
+inst
+```
+
+
+It is not yet possible to delete values again, but I'm working on this.
+
+# Bridging
+
+Say you started out with some idea of how your settings should look like, but decide you need to rearrange them. This typically involves the fact that you need to "bridge", i.e. add branches that did not existed before in order to assign your value.
+
+The current default preserves existing values, but depending on the nature of the existing value (or its parent), you might not get the results you desire (typically you want the final result to be accessible via `$`)
+
+```{r, eval = stand_alone}
+(inst <- list(github = "rappster"))
+createCrudExpression(inst, id = "github/user", value = "rappster",
+  in_parent = TRUE)
+inst
+```
+
+The value has been created, but it is not accessible via `$` (but via `[[`).
+
+```{r, eval = stand_alone}
+try(inst$github$user)
+inst[["github"]][["user"]]
+```
+
+But you typically do not (want to) care what the existing branch value was like when you introduced a new value. If so, you can run the following.
+
+```{r, eval = stand_alone}
+inst <- list(github = "rappster")
+createCrudExpression(inst, id = "github/user", value = "rappster",
+  in_parent = TRUE, use_tree = TRUE)
+inst
+```
+
+The value is now accessible via `$`.
+
+```{r, eval = stand_alone}
+try(inst$github$user)
+inst <- list(github = "rappster")
+```
+
+However, this comes at some computational costs as additional checks need to be performed before executing CRUD operations (see benchmark below).
+
+An extrem example of bridging:
+
+```{r, eval = stand_alone}
+inst <- list()
+createCrudExpression(inst, id = letters, value = "hello world!", 
+  in_parent = TRUE)
+inst
+```
+
+# Some benchmarks
+
+```{r, eval = stand_alone}
+inst <- list(github = list(users = list(user_1 = list(name = "none"))))
+
+library(microbenchmark)
+microbenchmark(
+  "1" = createCrudExpression(inst, id = "github/users/user_1/name", 
+    value = "rappster", in_parent = TRUE),
+  "2" = createCrudExpression(inst, id = "github/users/user_1/name/a/b/c", 
+    value = "rappster", in_parent = TRUE, use_tree = TRUE)
+)
+```
+
