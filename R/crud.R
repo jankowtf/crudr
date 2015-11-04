@@ -263,6 +263,8 @@ createCrudExpressionPlain <- function(inst, ...) {
 #' @param name \code{\link[base]{character}}.
 #'  Name of the actual object in the expression that values are extracted from
 #'  or assigned to.
+#' @param allow_null \code{\link[base]{logical}}.
+#'  Allows \code{value = NULL}. Useful for deleting values.
 #' @template threedots
 #' @return \code{\link[base]{expression}}.
 #' @example inst/examples/example-createCrudExpressionPlain.R
@@ -278,9 +280,13 @@ createCrudExpressionPlain.default <- function(
   id = character(),
   value = NULL,
   name = "inst",
+  allow_null = FALSE,
   ...
 ) {
-  if (is.null(value)) {
+  ## Ensure vectorized index //
+  id <- unlist(strsplit(id, "/"))
+
+  if (is.null(value) && !allow_null) {
     substitute(FUN(X, INDEX),
       list(FUN = as.name('[['), X = as.name(name), INDEX = id))
   } else {

@@ -11,8 +11,10 @@ vignette: >
 
 ```{r, include = FALSE}
 library(crudr)
-stand_alone_mode <- TRUE
+run <- FALSE
+root_dir <- paste(rep("../", 1), collapse = "")
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+knitr::opts_knit$set(root.dir = root_dir)
 ```
 
 # UML
@@ -46,7 +48,18 @@ crudr_uml <- '
   }
   @enduml
 '
-uml_file <- crudr:::plantuml3(crudr_uml, 'Architecture', filename = "uml")
+# knitr::opts_knit$set(root.dir = root_dir)
+uml_file <- crudr:::plantuml3(
+  crudr_uml, 'Architecture', 
+  filename = "vignettes/uml",
+  jarfile = "lib/plantuml.jar",
+  normalize = TRUE
+)
+# print(uml_file)
+# uml_file <- normalizePath(uml_file)
+# print(uml_file)
+# print(getwd())
+# knitr::opts_knit$set(root.dir = getwd())
 ```
 
 ![UML](`r uml_file`)
@@ -57,7 +70,7 @@ Class `ICrud` serves as the inferface class that can be **implemented** by other
 
 As no explicit instances of this class should be created/used, calling the its methods results in an error informing the user that he is working with the interface itself instead of an implementation of the interface.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst <- ICrud$new()
 try(inst$init())
 try(inst$has())
@@ -72,7 +85,7 @@ try(inst$reset())
 
 Class `Crud` implements the interface `ICrud` and serves as a base clase for inheritance.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst <- Crud$new()
 class(inst)
 inherits(inst, "ICrud")
@@ -80,7 +93,7 @@ inherits(inst, "ICrud")
 
 ## Getters/setters
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst <- Crud$new(main = as.environment(list(a = 1, b = 2)))
 
 value <- inst$getMain()
@@ -95,7 +108,7 @@ inst$getMain()$b
 
 ### Instantiate 
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst <- Crud$new()
 ```
 
@@ -104,7 +117,7 @@ inst <- Crud$new()
 
 Provide initial values:
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$init(a = 1, b = 2)
 ```
 
@@ -112,7 +125,7 @@ inst$init(a = 1, b = 2)
 
 Check if values exist based on one or multiple keys:
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$has("a")
 inst$has("b")
 inst$has("a", "b")
@@ -127,7 +140,7 @@ Create one or multiple key-value pairs. Takes into consideration existing key-va
 
 Note the different levels of strictness that can be applied. This is something that most methods support.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$create(c = 3)
 inst$create(d = 4, f = 5)
 inst$read()
@@ -149,7 +162,7 @@ Read/get values by one or multiple keys. Non-existing key-value pairs will resul
 
 Strictness levels `0` through `3` apply.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$read()
 inst$read("a")
 inst$read("a", "b")
@@ -164,7 +177,7 @@ Update values by one or multiple keys.
 
 Strictness levels `0` through `3` apply.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$read("a")
 inst$update(a = 10)
 inst$read("a")
@@ -188,7 +201,7 @@ Delete key-value pairs based on keys. Only existing pairs can be deleted.
 
 Strictness levels `0` through `3` apply.
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$read()
 inst$delete("f")
 
@@ -204,7 +217,7 @@ inst$read()
 
 ### Reset
 
-```{r, eval = stand_alone_mode}
+```{r, eval = run}
 inst$reset()
 inst$read()
 

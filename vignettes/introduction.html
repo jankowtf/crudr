@@ -10,7 +10,7 @@
 
 <meta name="author" content="Janko Thyson" />
 
-<meta name="date" content="2015-11-03" />
+<meta name="date" content="2015-11-04" />
 
 <title>crudr: Introduction</title>
 
@@ -54,7 +54,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">crudr: Introduction</h1>
 <h4 class="author"><em>Janko Thyson</em></h4>
-<h4 class="date"><em>2015-11-03</em></h4>
+<h4 class="date"><em>2015-11-04</em></h4>
 </div>
 
 
@@ -80,26 +80,17 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>Class <code>Crud</code> implements the interface <code>ICrud</code> and serves as a base clase for inheritance.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst &lt;-<span class="st"> </span>Crud$<span class="kw">new</span>()
 <span class="kw">class</span>(inst)
-<span class="co">#&gt; [1] &quot;Crud&quot;  &quot;ICrud&quot; &quot;R6&quot;</span>
-<span class="kw">inherits</span>(inst, <span class="st">&quot;ICrud&quot;</span>)
-<span class="co">#&gt; [1] TRUE</span></code></pre>
+<span class="kw">inherits</span>(inst, <span class="st">&quot;ICrud&quot;</span>)</code></pre>
 <div id="getterssetters" class="section level2">
 <h2>Getters/setters</h2>
 <pre class="sourceCode r"><code class="sourceCode r">inst &lt;-<span class="st"> </span>Crud$<span class="kw">new</span>(<span class="dt">main =</span> <span class="kw">as.environment</span>(<span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>)))
 
 value &lt;-<span class="st"> </span>inst$<span class="kw">getMain</span>()
 <span class="kw">as.list</span>(value, <span class="dt">sorted =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
 
 inst$<span class="kw">setMain</span>(<span class="kw">as.environment</span>(<span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">10</span>, <span class="dt">b =</span> <span class="dv">20</span>)))
 inst$<span class="kw">getMain</span>()$a
-<span class="co">#&gt; [1] 10</span>
-inst$<span class="kw">getMain</span>()$b
-<span class="co">#&gt; [1] 20</span></code></pre>
+inst$<span class="kw">getMain</span>()$b</code></pre>
 </div>
 <div id="crud-methods" class="section level2">
 <h2>CRUD methods</h2>
@@ -110,110 +101,34 @@ inst$<span class="kw">getMain</span>()$b
 <div id="init" class="section level3">
 <h3>Init</h3>
 <p>Provide initial values:</p>
-<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">init</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>)
-<span class="co">#&gt; [1] TRUE</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">init</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>)</code></pre>
 </div>
 <div id="has" class="section level3">
 <h3>Has</h3>
 <p>Check if values exist based on one or multiple keys:</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">has</span>(<span class="st">&quot;b&quot;</span>)
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] TRUE</span>
 
 inst$<span class="kw">has</span>(<span class="st">&quot;c&quot;</span>)
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] FALSE</span>
-inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;c&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] FALSE</span></code></pre>
+inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;c&quot;</span>)</code></pre>
 </div>
 <div id="create" class="section level3">
 <h3>Create</h3>
 <p>Create one or multiple key-value pairs. Takes into consideration existing key-value pairs which, by default, are not overwritten. Overwrites need to be explicitly authorized by <code>overwrite = TRUE</code>.</p>
 <p>Note the different levels of strictness that can be applied. This is something that most methods support.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">3</span>)
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">create</span>(<span class="dt">d =</span> <span class="dv">4</span>, <span class="dt">f =</span> <span class="dv">5</span>)
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] 3</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] 5</span>
 
 <span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>))
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] FALSE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] 3</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] 5</span>
 ## --&gt; c already existed with value = 3
 inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">1</span>)
-<span class="co">#&gt; Crud: create: invalid: c</span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] FALSE</span>
 <span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">2</span>))
-<span class="co">#&gt; Warning in inst$create(c = 30, strict = 2): Crud: create: invalid: c</span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] FALSE</span>
 <span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">3</span>))
 inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] 30</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] 5</span>
 ## --&gt; c overwritten</code></pre>
 </div>
 <div id="read" class="section level3">
@@ -221,39 +136,10 @@ inst$<span class="kw">read</span>()
 <p>Read/get values by one or multiple keys. Non-existing key-value pairs will result in return values of NULL.</p>
 <p>Strictness levels <code>0</code> through <code>3</code> apply.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] 30</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] 5</span>
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
 
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; NULL</span>
 <span class="kw">try</span>(inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>, <span class="dt">strict =</span> <span class="dv">3</span>))</code></pre>
 </div>
 <div id="update" class="section level3">
@@ -261,132 +147,44 @@ inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span c
 <p>Update values by one or multiple keys.</p>
 <p>Strictness levels <code>0</code> through <code>3</code> apply.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
 inst$<span class="kw">update</span>(<span class="dt">a =</span> <span class="dv">10</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 10</span>
 
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 10</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
 inst$<span class="kw">update</span>(<span class="dt">a =</span> <span class="dv">1000</span>, <span class="dt">b =</span> <span class="dv">2000</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1000</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2000</span>
 
 inst$<span class="kw">update</span>(<span class="dt">x =</span> <span class="dv">99</span>)
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; [1] FALSE</span>
 inst$<span class="kw">read</span>(<span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; NULL</span>
 
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1000</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; NULL</span>
 inst$<span class="kw">update</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">x =</span> <span class="dv">99</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; [1] FALSE</span>
 <span class="kw">try</span>(inst$<span class="kw">update</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">x =</span> <span class="dv">99</span>, <span class="dt">strict =</span> <span class="dv">3</span>))
-inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; NULL</span></code></pre>
+inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;x&quot;</span>)</code></pre>
 </div>
 <div id="delete" class="section level3">
 <h3>Delete</h3>
 <p>Delete key-value pairs based on keys. Only existing pairs can be deleted.</p>
 <p>Strictness levels <code>0</code> through <code>3</code> apply.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2000</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] 30</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] 5</span>
 inst$<span class="kw">delete</span>(<span class="st">&quot;f&quot;</span>)
-<span class="co">#&gt; $f</span>
-<span class="co">#&gt; [1] TRUE</span>
 
 inst$<span class="kw">delete</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;c&quot;</span>)
-<span class="co">#&gt; $d</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $c</span>
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2000</span>
 
 inst$<span class="kw">delete</span>(<span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; [1] FALSE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2000</span>
 inst$<span class="kw">delete</span>(<span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>)
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] TRUE</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $x</span>
-<span class="co">#&gt; [1] FALSE</span>
 <span class="kw">try</span>(inst$<span class="kw">delete</span>(<span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>, <span class="dt">strict =</span> <span class="dv">3</span>))
-inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span></code></pre>
+inst$<span class="kw">read</span>()</code></pre>
 </div>
 <div id="reset" class="section level3">
 <h3>Reset</h3>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">reset</span>()
-<span class="co">#&gt; [1] TRUE</span>
 inst$<span class="kw">read</span>()
-<span class="co">#&gt; $a</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $b</span>
-<span class="co">#&gt; [1] 2</span>
 
 inst$<span class="kw">reset</span>(<span class="dt">type =</span> <span class="st">&quot;hard&quot;</span>)
-<span class="co">#&gt; [1] TRUE</span>
-inst$<span class="kw">read</span>()
-<span class="co">#&gt; list()</span></code></pre>
+inst$<span class="kw">read</span>()</code></pre>
 </div>
 </div>
 </div>

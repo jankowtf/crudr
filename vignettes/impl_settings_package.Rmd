@@ -11,55 +11,68 @@ vignette: >
 
 ```{r, include = FALSE}
 library(crudr)
-stand_alone <- TRUE
+run <- FALSE
+root_dir <- paste(rep("../", 1), collapse = "")
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+knitr::opts_knit$set(root.dir = root_dir)
 ```
 
 # UML
 
 ```{r echo=FALSE}
-crudr_uml <- '
-  @startuml
-  ICrud *-- Crud: implements <
-  Crud <|-- Crud.Settings: extends <
-
-  class ICrud {
-    +init()
-    +has()
-    +create()
-    +read()
-    +update()
-    +delete()
-    +reset()
-    -stopIfInterface()
-  }
-  class Crud {
-    +main: environment
-    -initial_state: list
-    -stopIfEmpty()
-    -createMessage(),
-    -cacheInitialState()
-  }
-  class Crud.Settings {
-    +main: function
-    -cacheInitialState()
-  }
-  @enduml
-'
-uml_file <- crudr:::plantuml3(crudr_uml, 'Architecture', filename = "uml")
+## crudr_uml <- '
+##   @startuml
+##   ICrud *-- Crud: implements <
+##   Crud <|-- Crud.Settings: extends <
+## 
+##   class ICrud {
+##     +init()
+##     +has()
+##     +create()
+##     +read()
+##     +update()
+##     +delete()
+##     +reset()
+##     -stopIfInterface()
+##   }
+##   class Crud {
+##     +main: environment
+##     -initial_state: list
+##     -stopIfEmpty()
+##     -createMessage(),
+##     -cacheInitialState()
+##   }
+##   class Crud.Settings {
+##     +main: function
+##     -cacheInitialState()
+##   }
+##   @enduml
+##
+## knitr::opts_knit$set(root.dir = root_dir)
+## uml_file <- crudr:::plantuml3(
+##   crudr_uml, 'Architecture', 
+##   filename = "vignettes/uml",
+##   jarfile = "lib/plantuml.jar",
+##   normalize = TRUE
+## )
+## print(uml_file)
+## uml_file <- normalizePath(uml_file)
+## print(uml_file)
+## knitr::opts_knit$set(root.dir = getwd())
+uml_file <- normalizePath("vignettes/uml.png")
 ```
 
 ![UML](`r uml_file`)
 
 # Instantiate 
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst <- Crud.Settings$new()
 ```
 
 # Init
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$init(a = 1, b = 2)
 inst$getMain()
 ## --> this is actually the return value of calling 
@@ -69,7 +82,7 @@ inst$getMain()()
 
 # Has 
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$has("a")
 inst$has("b")
 inst$has("a", "b")
@@ -80,7 +93,7 @@ inst$has("a", "c")
 
 # Create
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$create(c = 3)
 inst$create(d = 4, f = 5)
 inst$read()
@@ -98,7 +111,7 @@ inst$read()
 
 # Read
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$read()
 inst$read("a")
 inst$read("a", "b")
@@ -109,7 +122,7 @@ try(inst$read("a", "b", "x", strict = 3))
 
 # Update
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$read("a")
 inst$update(a = 10)
 inst$read("a")
@@ -129,7 +142,7 @@ inst$read("a", "x")
 
 # Delete
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$read()
 inst$delete("f")
 
@@ -145,7 +158,7 @@ inst$read()
 
 # Reset
 
-```{r, eval = stand_alone}
+```{r, eval = run}
 inst$reset()
 inst$read()
 

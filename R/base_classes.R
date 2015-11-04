@@ -53,22 +53,53 @@ Crud <- R6Class(
     setMain = function(value) {
       self$main <- value
     },
+    init = function(..., cache_state = TRUE) {
+      values <- list(...)
+      if (any(grepl("/", names(values)))) {
+        inst <- as.list(self$getMain())
+        ## Slower but a bit more convenient //
+        inst <- as.list(self$getMain())
+        # inst <- self$getMain()
+        for (ii in 1:length(values)) {
+          createCrudExpression(inst, id = names(values)[ii], values[[ii]],
+            in_parent = TRUE)
+        }
+
+        ## Faster but can't bridge gaps yet //
+#         envir <- environment()
+#         for (ii in 1:length(values)) {
+#           try(
+#             eval(createCrudExpressionPlain(inst, names(values)[ii],
+#               values[[ii]]), envir = envir),
+#             silent = TRUE
+#           )
+#         }
+        self$setMain(as.environment(inst))
+      } else {
+        self$setMain(as.environment(list(...)))
+      }
+      if (cache_state) {
+        private$cacheInitialState()
+      }
+      TRUE
+    },
     has = function(...) {
       values <- as.character(list(...))
       if (!length(values)) {
         private$stopIfEmpty()
       }
-      nms <- ls(self$getMain(), all.names = TRUE)
-      out <- as.list(values %in% nms)
+      if (any(grepl("/", values))) {
+        inst <- as.list(self$getMain())
+        out <- lapply(values, function(ii) {
+          res <- try(eval(createCrudExpressionPlain(inst, ii)), silent = TRUE)
+          !is.null(res) && !inherits(res, "try-error")
+        })
+      } else {
+        nms <- ls(self$getMain(), all.names = TRUE)
+        out <- as.list(values %in% nms)
+      }
       names(out) <- values
       out
-    },
-    init = function(..., cache_state = TRUE) {
-      self$setMain(as.environment(list(...)))
-      if (cache_state) {
-        private$cacheInitialState()
-      }
-      TRUE
     },
     create = function(..., strict = 0:3, overwrite = FALSE) {
       strict <- as.numeric(match.arg(as.character(strict), as.character(0:3)))
@@ -100,10 +131,14 @@ Crud <- R6Class(
           stop(msg)
         }
         if (overwrite) {
-          # self$update(values_in, strict = strict)
-          fun <- self$update
-          do.call(fun, c(values_in, list(strict = strict)))
-          out[names(values_in)] <- TRUE
+#           if (any(grepl("/", names(values)))) {
+#
+#           } else {
+            # self$update(values_in, strict = strict)
+            fun <- self$update
+            do.call(fun, c(values_in, list(strict = strict)))
+            out[names(values_in)] <- TRUE
+          # }
         }
       }
 
@@ -121,32 +156,60 @@ Crud <- R6Class(
       if (!length(values)) {
         out <- as.list(self$getMain(), sorted = TRUE)
       } else {
-        out <- vector("list", length(values))
-        names(out) <- values
-
-        # idx_has <- self$has(values)
-        fun <- self$has
-        idx_has <- unlist(do.call(fun, as.list(values)))
-        values_in <- values[idx_has]
-        values_out <- values[!idx_has]
-
-        if (length(values_out)) {
-          msg <- private$createMessage(
-            sprintf("invalid: %s", paste(values_out, collapse = ", "))
-          )
-          if (strict <= 2) {
-            if (strict == 1) {
-              message(msg)
-            } else if (strict == 2) {
-              warning(msg)
+        if (any(grepl("/", values))) {
+          inst <- as.list(self$getMain())
+          out <- lapply(values, function(ii) {
+            res <- try(eval(createCrudExpressionPlain(inst, ii)), silent = TRUE)
+            if (inherits(res, "try-error")) {
+              NULL
+            } else {
+              res
             }
-          } else if (strict == 3) {
-            stop(msg)
+          })
+          values_out <- values[sapply(out, is.null)]
+          if (length(values_out)) {
+            msg <- private$createMessage(
+              sprintf("invalid: %s", paste(values_out, collapse = ", "))
+            )
+            if (strict <= 2) {
+              if (strict == 1) {
+                message(msg)
+              } else if (strict == 2) {
+                warning(msg)
+              }
+            } else if (strict == 3) {
+              stop(msg)
+            }
           }
-        }
+          names(out) <- values
+        } else {
+          out <- vector("list", length(values))
+          names(out) <- values
 
-        if (length(values_in)) {
-          out[values_in] <- as.list(self$getMain(), sorted = TRUE)[values_in]
+          # idx_has <- self$has(values)
+          fun <- self$has
+          idx_has <- unlist(do.call(fun, as.list(values)))
+          values_in <- values[idx_has]
+          values_out <- values[!idx_has]
+
+          if (length(values_out)) {
+            msg <- private$createMessage(
+              sprintf("invalid: %s", paste(values_out, collapse = ", "))
+            )
+            if (strict <= 2) {
+              if (strict == 1) {
+                message(msg)
+              } else if (strict == 2) {
+                warning(msg)
+              }
+            } else if (strict == 3) {
+              stop(msg)
+            }
+          }
+
+          if (length(values_in)) {
+            out[values_in] <- as.list(self$getMain(), sorted = TRUE)[values_in]
+          }
         }
       }
       out
@@ -182,11 +245,31 @@ Crud <- R6Class(
       }
 
       if (length(values_in)) {
-        envir <- self$getMain()
-        sapply(1:length(values_in), function(ii) {
-          assign(names(values_in)[ii], values_in[[ii]], envir = envir)
-        })
-        out[names(values_in)] <- TRUE
+        if (any(grepl("/", names(values_in)))) {
+          inst <- as.list(self$getMain())
+          envir <- environment()
+          lapply(1:length(values_in), function(ii) {
+            res <- try(
+              eval(createCrudExpressionPlain(inst, names(values_in)[ii],
+                values_in[[ii]]), envir = envir),
+              silent = TRUE
+            )
+            if (inherits(res, "try-error")) {
+              # print(res)
+              FALSE
+            } else {
+              TRUE
+            }
+          })
+          self$setMain(as.environment(inst))
+          out[names(values_in)] <- TRUE
+        } else {
+          envir <- self$getMain()
+          sapply(1:length(values_in), function(ii) {
+            assign(names(values_in)[ii], values_in[[ii]], envir = envir)
+          })
+          out[names(values_in)] <- TRUE
+        }
       }
       out
     },
@@ -221,11 +304,29 @@ Crud <- R6Class(
       }
 
       if (length(values_in)) {
-        envir <- self$getMain()
-        sapply(values_in, function(ii) {
-          rm(list = ii, envir = envir)
-        })
-        out[values_in] <- TRUE
+        if (any(grepl("/", values))) {
+          inst <- as.list(self$getMain())
+          envir <- environment()
+          out <- lapply(values, function(ii) {
+            expr <- createCrudExpressionPlain(inst, ii, NULL, allow_null = TRUE)
+            # print(expr)
+            res <- try(eval(expr, envir = envir), silent = TRUE)
+            if (inherits(res, "try-error")) {
+              # print(res)
+              FALSE
+            } else {
+              TRUE
+            }
+          })
+          self$setMain(as.environment(inst))
+          names(out) <- values
+        } else {
+          envir <- self$getMain()
+          sapply(values_in, function(ii) {
+            rm(list = ii, envir = envir)
+          })
+          out[values_in] <- TRUE
+        }
       }
       out
     },

@@ -30,24 +30,30 @@ require("crudr")
 ## Examples
 
 ```
+## Instantiate + init //
 inst <- Crud$new()
 inst$init(a = 1, b = 2)
 
+## Has //
 inst$has("a")
 inst$has("a", "b")
 inst$has("a", "b", "c")
 
+## Read //
 inst$read("a")
 inst$read("a", "b")
 inst$read("a", "b", "c")
 
+## Create //
 inst$create(x = 10)
 inst$read("x")
 inst$create(x = 100, y = 200)
+## --> `x` already exists, can't be created unless overwrite = TRUE
 inst$read("x", "y")
 inst$create(x = 100, y = 200, overwrite = TRUE)
 inst$read("x", "y")
 
+## Update //
 inst$update(a = 10)
 inst$read("a")
 inst$update(a = 100, b = 200)
@@ -55,10 +61,68 @@ inst$read("a", "b")
 inst$update(a = 1, abc = TRUE)
 ## --> `abc` had not been created and can thus not be updated
 
+## Delete //
 inst$delete("a")
 inst$has("a")
 inst$delete("b", "x")
 
+## Reset //
+inst$read()
+inst$reset()
+inst$read()
+inst$reset("hard")
+inst$read()
+```
+
+## Nested values
+
+```
+## Instantiate + init //
+inst <- Crud$new()
+inst$init("a/b/c" = 1, "x/y/z" = 2)
+
+## Has //
+inst$has("a")
+inst$has("a", "b")
+inst$has("a", "b", "x")
+inst$has("a/b")
+inst$has("a/b/c", "x/y")
+
+## Read //
+inst$read("a")
+inst$read("a", "b")
+inst$read("a", "b", "x")
+inst$read("a/b")
+inst$read("a/b/c")
+inst$read("a/b/c", "x")
+
+## Create //
+inst$create("a/b/new_1" = 10)
+inst$read("a/b/new_1")
+inst$create("a/b/new_1" = 100, "a/b/new_2" = 200)
+## --> `a/b/new_1` already exists, can't be created unless overwrite = TRUE
+inst$read("a/b/new_1", "a/b/new_2")
+inst$create("a/b/new_1" = 100, "a/b/new_2" = 200, overwrite = TRUE)
+inst$read("a/b/new_1", "a/b/new_2")
+
+## Update //
+inst$update("a/b/c" = 10)
+inst$read("a/b/c")
+inst$update("a/b/c" = 100, "x/y/z" = 200)
+inst$read("a/b/c", "x/y/z")
+inst$update("a/b/c" = 1, "a/b/notthere" = TRUE)
+## --> `a/b/notthere` had not been created and can thus not be updated
+
+inst$read("a")
+inst$update("a/b" = "I'm not a list anymore")
+inst$read("a")
+
+## Delete //
+inst$delete("a/b")
+inst$has("a/b")
+inst$delete("a", "x/y/z")
+
+## Reset //
 inst$read()
 inst$reset()
 inst$read()

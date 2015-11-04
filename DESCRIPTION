@@ -1,8 +1,8 @@
 Package: crudr
 Type: Package
 Title: Interfaces for CRUD operations
-Version: 0.1.5
-Date: 2015-11-03
+Version: 0.1.6
+Date: 2015-11-04
 Authors@R: person("Janko", "Thyson", email = "janko.thyson@rappster.de",
     role = c("aut", "cre"))
 Description: Provides generic interfaces that can be systematically
@@ -22,9 +22,9 @@ Suggests:
     microbenchmark
 VignetteBuilder: knitr
 Collate:
-    'access.R'
     'interface_classes.R'
     'base_classes.R'
+    'crud.R'
     'crudr-package.r'
     'implementation_classes.R'
     'private.R'
