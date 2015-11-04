@@ -1,9 +1,18 @@
 ---
 title: "Handling threedots input in batch scenarios"
-author: "Janko Thyson"
-date: "4. November 2015"
-output: html_document
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{README}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include = FALSE}
+library(crudr)
+run <- FALSE
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
 
 # Problem
 
@@ -13,7 +22,7 @@ Function that take their main arguments via `...` are great for interactive use,
 
 Interactive mode:
 
-```{r}
+```{r, eval=run}
 library(settings)
 x <- options_manager(a = 1, b = 2)
 x()
@@ -23,7 +32,7 @@ Batch mode:
 
 Suppose that `values` has been created by another upstream function and that you would like to feed that to `options_manager`.
 
-```{r}
+```{r, eval=run}
 values <- list(a = 1, b = 2)
 x <- options_manager(values)
 x()
@@ -39,7 +48,7 @@ The key is to implement a function that handles values passed via `...`.
 
 Let's start out with a simple example:
 
-```{r}
+```{r, eval=run}
 foo <- function(...) {
   values <- list(...)
   nms <- names(values)
@@ -59,7 +68,7 @@ foo <- function(...) {
 
 That gives you the desired result no matter in what format you provide your input to `settings::options_manager`
 
-```{r}
+```{r, eval=run}
 opts <- foo(a = 1, b = 2)
 opts()
 opts <- foo(list(a = 1, b = 2))
@@ -76,7 +85,7 @@ This draft is a bit more generic.
 
 - `withHandledThreedots` is simply a generic wrapper that combines calls to `handleThreedots` and the actual target function - which would be `settings::options_manager` in our example case.
 
-```{r}
+```{r, eval=run}
 handleThreedots <- function(...) {
   values <- list(...)
   nms <- names(values)
@@ -100,7 +109,7 @@ withHandledThreedots <- function(..., fun) {
 
 Examples with only `handleThreedots`
 
-```{r}
+```{r, eval=run}
 handleThreedots(a = 1, b = 2, c = 3, d = 4)
 handleThreedots(list(a = 1, b = 2), list(c = 3, d = 4))
 handleThreedots(list(a = 1), b = 2, list(c = 3), d = 4)
@@ -108,7 +117,7 @@ handleThreedots(list(a = 1), b = 2, list(c = 3), d = 4)
 
 Actual example:
 
-```{r}
+```{r, eval=run}
 res <- withHandledThreedots(a = 1, b = 2, c = 3, d = 4, 
   fun = options_manager)
 res()
@@ -122,7 +131,7 @@ res()
 
 This approach can also handle additional arguments that `fun` might take:
 
-```{r}
+```{r, eval=run}
 res <- withHandledThreedots(a = 1, b = 2, c = 3, d = 4,
   fun = options_manager, .allowed = list(a = inrange(1, 2)))
 res()
@@ -139,7 +148,7 @@ try(res(a = 3))
 
 Just to make sure that the additional argument `.allowed` of `settings::options_manager` was simply not shown because its name starts with a dot
 
-```{r}
+```{r, eval=run}
 foo <- function(..., special = FALSE) {
   if (special) {
     message("hello world!")

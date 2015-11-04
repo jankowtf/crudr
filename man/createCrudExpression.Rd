@@ -2,7 +2,7 @@
 % Please edit documentation in R/crud.R
 \name{createCrudExpression}
 \alias{createCrudExpression}
-\title{Create access expression}
+\title{Create CRUD expression}
 \usage{
 createCrudExpression(inst, ...)
 }
@@ -15,7 +15,7 @@ createCrudExpression(inst, ...)
 See respective methods.
 }
 \description{
-Creates an access expression. This either is an expression for value
+Creates an CRUD expression. This either is an expression for value
 extraction involving the syntactic sugars for extraction (\code{[[} or
 \code{$}; see \code{\link[base]{Extract}}) or one that also involves
 the syntactic sugar for assignments

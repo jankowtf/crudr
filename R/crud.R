@@ -2,10 +2,10 @@
 # createCrudExpression --------------------------------------------------
 
 #' @title
-#' Create access expression
+#' Create CRUD expression
 #'
 #' @description
-#' Creates an access expression. This either is an expression for value
+#' Creates an CRUD expression. This either is an expression for value
 #' extraction involving the syntactic sugars for extraction (\code{[[} or
 #' \code{$}; see \code{\link[base]{Extract}}) or one that also involves
 #' the syntactic sugar for assignments
@@ -34,7 +34,7 @@ createCrudExpression <- function(inst, ...) {
 }
 
 #' @title
-#' Create access expression
+#' Create CRUD expression
 #'
 #' @description
 #' Default method of \code{\link[crudr]{createCrudExpression}}.
@@ -87,7 +87,6 @@ createCrudExpression <- function(inst, ...) {
 #'    \code{\link[crudr]{createCrudExpressionTree}}.
 #' @param allow_null \code{\link[base]{logical}}.
 #'  Allows \code{value = NULL}. Useful for deleting values.
-#' @template threedots
 #' @param affect_branch \code{\link[base]{logical}}.
 #'  Only relevant when \code{value = NULL} in which case a value will be
 #'  deleted. Unless we use \code{use_tree = TRUE}, the function has no means

@@ -66,8 +66,21 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <span class="co">#&gt; $github$users$user_1</span>
 <span class="co">#&gt; $github$users$user_1$name</span>
 <span class="co">#&gt; [1] &quot;none&quot;</span>
+
+## Create //
 <span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="kw">c</span>(<span class="st">&quot;github&quot;</span>, <span class="st">&quot;users&quot;</span>, <span class="st">&quot;user_1&quot;</span>, <span class="st">&quot;name&quot;</span>), 
   <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="kw">c</span>(<span class="st">&quot;github&quot;</span>, <span class="st">&quot;users&quot;</span>, <span class="st">&quot;user_1&quot;</span>, <span class="st">&quot;name&quot;</span>), 
+  <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; inst[[c(&quot;github&quot;, &quot;users&quot;, &quot;user_1&quot;, &quot;name&quot;)]]</span>
 <span class="co">#&gt; [1] &quot;rappster&quot;</span>
 inst
 <span class="co">#&gt; $github</span>
@@ -91,7 +104,45 @@ inst
 <span class="co">#&gt; $github$users$user_1</span>
 <span class="co">#&gt; $github$users$user_1$name</span>
 <span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
-<p>It is not yet possible to delete values again, but I’m working on this.</p>
+</div>
+<div id="delete" class="section level1">
+<h1>Delete</h1>
+<pre class="sourceCode r"><code class="sourceCode r">## Delete //
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users/user_1/name&quot;</span>, 
+  <span class="dt">value =</span> <span class="ot">NULL</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; named list()</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; named list()</span>
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users/user_1/name&quot;</span>, 
+  <span class="dt">value =</span> <span class="st">&quot;johndoe&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;johndoe&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$users</span>
+<span class="co">#&gt; $github$users$user_1</span>
+<span class="co">#&gt; $github$users$user_1$name</span>
+<span class="co">#&gt; [1] &quot;johndoe&quot;</span>
+
+## Say you decide you don't really need multiple users and decide 
+## to delete the entire branch:
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/users&quot;</span>, 
+  <span class="dt">value =</span> <span class="ot">NULL</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>, <span class="dt">affect_branch =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; NULL</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; named list()</span>
+## --&gt; branch `users` is gone
+<span class="kw">createCrudExpression</span>(inst, <span class="dt">id =</span> <span class="st">&quot;github/user&quot;</span>, 
+  <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>)
+<span class="co">#&gt; [1] &quot;rappster&quot;</span>
+inst
+<span class="co">#&gt; $github</span>
+<span class="co">#&gt; $github$user</span>
+<span class="co">#&gt; [1] &quot;rappster&quot;</span></code></pre>
 </div>
 <div id="bridging" class="section level1">
 <h1>Bridging</h1>
@@ -174,9 +225,9 @@ inst
     <span class="dt">value =</span> <span class="st">&quot;rappster&quot;</span>, <span class="dt">in_parent =</span> <span class="ot">TRUE</span>, <span class="dt">use_tree =</span> <span class="ot">TRUE</span>)
 )
 <span class="co">#&gt; Unit: microseconds</span>
-<span class="co">#&gt;  expr     min      lq      mean   median       uq      max neval</span>
-<span class="co">#&gt;     1  33.429  39.588  46.59037  45.1590  47.5055  130.785   100</span>
-<span class="co">#&gt;     2 600.557 699.086 876.29780 875.6175 920.7760 2065.589   100</span></code></pre>
+<span class="co">#&gt;  expr     min       lq      mean   median       uq      max neval</span>
+<span class="co">#&gt;     1  35.776  41.0540  48.01843  46.3325  49.5580   84.453   100</span>
+<span class="co">#&gt;     2 652.461 719.4665 902.29945 889.4000 975.0265 1860.613   100</span></code></pre>
 </div>
 
 

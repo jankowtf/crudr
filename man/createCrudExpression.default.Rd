@@ -2,13 +2,14 @@
 % Please edit documentation in R/crud.R
 \name{createCrudExpression.default}
 \alias{createCrudExpression.default}
-\title{Create access expression}
+\title{Create CRUD expression}
 \usage{
 \method{createCrudExpression}{default}(inst, id = character(), value = NULL,
   name_obj = "inst", name_value = "value", as_name_obj = TRUE,
   as_name_value = FALSE, evaluate = FALSE, sugar = c("[[", "$"),
   in_parent = FALSE, return_conventional = TRUE, strict = 0:3,
-  fail_safe = FALSE, use_tree = FALSE, ...)
+  fail_safe = FALSE, use_tree = FALSE, allow_null = FALSE,
+  affect_branch = FALSE, ...)
 }
 \arguments{
 \item{inst}{\code{\link[base]{list}}.
@@ -67,6 +68,17 @@ Wrap with \code{\link[base]{try}}.}
 \item{use_tree}{\code{\link[base]{logical}}.
 Use expression tree as returned by
   \code{\link[crudr]{createCrudExpressionTree}}.}
+
+\item{allow_null}{\code{\link[base]{logical}}.
+Allows \code{value = NULL}. Useful for deleting values.}
+
+\item{affect_branch}{\code{\link[base]{logical}}.
+Only relevant when \code{value = NULL} in which case a value will be
+deleted. Unless we use \code{use_tree = TRUE}, the function has no means
+of distinguishing the provided \code{id} belongs to a branch or a leaf in
+the hierarchy. Setting this to \code{TRUE} will delete the entire branch
+while \code{FALSE} will keep the branch with a value of
+\code{structure(list(), names = character())}.}
 
 \item{...}{Further arguments to be passed to subsequent functions/methods.}
 }

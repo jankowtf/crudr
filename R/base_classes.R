@@ -54,7 +54,8 @@ Crud <- R6Class(
       self$main <- value
     },
     init = function(..., cache_state = TRUE) {
-      values <- list(...)
+      # values <- list(...)
+      values <- handleThreedots(...)
       if (any(grepl("/", names(values)))) {
         inst <- as.list(self$getMain())
         ## Slower but a bit more convenient //
@@ -84,7 +85,8 @@ Crud <- R6Class(
       TRUE
     },
     has = function(...) {
-      values <- as.character(list(...))
+      # values <- as.character(list(...))
+      values <- as.character(handleThreedots(...))
       if (!length(values)) {
         private$stopIfEmpty()
       }
@@ -103,7 +105,8 @@ Crud <- R6Class(
     },
     create = function(..., strict = 0:3, overwrite = FALSE) {
       strict <- as.numeric(match.arg(as.character(strict), as.character(0:3)))
-      values <- list(...)
+      # values <- list(...)
+      values <- handleThreedots(...)
       if (!length(values)) {
         private$stopIfEmpty()
       }
@@ -152,7 +155,8 @@ Crud <- R6Class(
     },
     read = function(..., strict = 0:3) {
       strict <- as.numeric(match.arg(as.character(strict), as.character(0:3)))
-      values <- as.character(list(...))
+      # values <- as.character(list(...))
+      values <- as.character(handleThreedots(...))
       if (!length(values)) {
         out <- as.list(self$getMain(), sorted = TRUE)
       } else {
@@ -216,7 +220,8 @@ Crud <- R6Class(
     },
     update = function(..., strict = 0:3) {
       strict <- as.numeric(match.arg(as.character(strict), as.character(0:3)))
-      values <- list(...)
+      # values <- list(...)
+      values <- handleThreedots(...)
       if (!length(values)) {
         private$stopIfEmpty()
       }
@@ -275,7 +280,8 @@ Crud <- R6Class(
     },
     delete = function(..., strict = 0:3) {
       strict <- as.numeric(match.arg(as.character(strict), as.character(0:3)))
-      values <- as.character(list(...))
+      # values <- as.character(list(...))
+      values <- as.character(handleThreedots(...))
       if (!length(values)) {
         private$stopIfEmpty()
       }
@@ -307,7 +313,7 @@ Crud <- R6Class(
         if (any(grepl("/", values))) {
           inst <- as.list(self$getMain())
           envir <- environment()
-          out <- lapply(values, function(ii) {
+          lapply(values_in, function(ii) {
             expr <- createCrudExpressionPlain(inst, ii, NULL, allow_null = TRUE)
             # print(expr)
             res <- try(eval(expr, envir = envir), silent = TRUE)
@@ -319,7 +325,7 @@ Crud <- R6Class(
             }
           })
           self$setMain(as.environment(inst))
-          names(out) <- values
+          out[values_in] <- TRUE
         } else {
           envir <- self$getMain()
           sapply(values_in, function(ii) {

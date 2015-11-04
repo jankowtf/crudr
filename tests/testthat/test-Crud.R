@@ -53,6 +53,22 @@ test_that("Crud: init: nested", {
   )
 })
 
+context("Crud: init: handled threedot")
+
+test_that("Crud: init: handled threedot", {
+  # Crud$debug("init")
+  inst <- Crud$new()
+  expect_identical(inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1)), TRUE)
+  expect_identical(as.list(inst$getMain(), sorted = TRUE),
+    list(
+      a = 1,
+      b = list(foo = 1),
+      c = 1,
+      d = list(foo = 1)
+    )
+  )
+})
+
 # Crud: has ------------------------------------------------------
 
 context("Crud: has")
@@ -97,6 +113,19 @@ test_that("Crud: has: nested", {
   ## Multiple with non-existing:
   expect_identical(inst$has("a/b/c", "A/B/C"),
     list("a/b/c" = TRUE, "A/B/C" = FALSE))
+})
+
+test_that("Crud: has: handled threedots", {
+  # Crud$debug("has")
+  inst <- Crud$new()
+  inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1))
+
+  ## Atomic + existing:
+  expect_identical(inst$has("a", "b/foo", list("c", "d/foo")),
+    list("a" = TRUE, "b/foo" = TRUE, "c" = TRUE, "d/foo" = TRUE))
+  ## Atomic + non-existing:
+  expect_identical(inst$has("x_1", "x_1/foo", list("x_2", "x_2/foo")),
+    list("x_1" = FALSE, "x_1/foo" = FALSE, "x_2" = FALSE, "x_2/foo" = FALSE))
 })
 
 # Crud: create ---------------------------------------------------
@@ -336,6 +365,28 @@ test_that("Crud: create: nested", {
   )
 })
 
+test_that("Crud: create: handled threedot", {
+  # Crud$debug("create")
+  inst <- Crud$new()
+  inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1))
+
+  ## Atomic + new:
+  expect_identical(inst$create(a_foo = 1, "b/foo/bar" = 1,
+    list(c_foo = 1, "d/foo/bar" = 1)),
+    list(a_foo = TRUE, "b/foo/bar" = TRUE, c_foo = TRUE, "d/foo/bar" = TRUE)
+  )
+  expect_identical(as.list(inst$getMain(), sorted = TRUE),
+    list(
+      a = 1,
+      a_foo = 1,
+      b = list(foo = c(1, bar = 1)),
+      c = 1,
+      c_foo = 1,
+      d= list(foo = c(1, bar = 1))
+    )
+  )
+})
+
 # Crud: read -----------------------------------------------------
 
 context("Crud: read")
@@ -447,6 +498,20 @@ test_that("Crud: read: nested", {
   expect_error(
     expect_identical(inst$read("a/b/c", "A/B/C", strict = 3), target),
     pattern
+  )
+})
+
+context("Crud: read: handled threedots")
+
+test_that("Crud: read: handled threedots", {
+  # Crud$debug("read")
+  inst <- Crud$new()
+  inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1))
+
+  expect_identical(
+    inst$read("a", "b/foo", "hello", list("c", "d/foo", "world")),
+    list("a" = 1, "b/foo" = 1, "hello" = NULL, "c" = 1,
+      "d/foo" = 1, "world" = NULL)
   )
 })
 
@@ -590,6 +655,19 @@ test_that("Crud: update: nested", {
   )
 })
 
+test_that("Crud: update: handled threedots", {
+  # Crud$debug("update")
+  inst <- Crud$new()
+  inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1))
+
+  expect_identical(
+    inst$update("a" = 10, "b/foo" = 10, "hello" = 1, list("c" = 10,
+      "d/foo" = 10, "world" = 1)),
+    list("a" = TRUE, "b/foo" = TRUE, "hello" = FALSE, "c" = TRUE,
+      "d/foo" = TRUE, "world" = FALSE)
+  )
+})
+
 # Crud: delete ---------------------------------------------------
 
 context("Crud: delete")
@@ -657,83 +735,15 @@ test_that("Crud: delete", {
 
 context("Crud: delete: nested")
 
-test_that("Crud: delete: nested", {
+test_that("Crud: delete: handled threedots", {
   # Crud$debug("delete")
   inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
+  inst$init(a = 1, "b/foo" = 1, list(c = 1, "d/foo" = 1))
 
-  ## Atomic + existing:
-  expect_identical(inst$delete("a/b/c"), list("a/b/c" = TRUE))
-  expect_identical(inst$read(),
-    list(a = list(b = structure(list(), names = character())),
-      x = list(y = list(z = 2))
-    )
-  )
-
-  ## Atomic + non-existing:
-  target <- list("A/B/C" = FALSE)
-  id <- "A/B/C"
-  expect_identical(inst$delete(id), target)
-
-  pattern <- gsub("\\.", "\\\\.", paste0(class(inst)[1],
-    ": delete: invalid: A/B/C"))
-  expect_message(
-    expect_identical(inst$delete(id, strict = 1), target),
-    pattern
-  )
-  expect_warning(
-    expect_identical(inst$delete(id, strict = 2), target),
-    pattern
-  )
-  expect_error(
-    expect_identical(inst$delete(id, strict = 3), target),
-    pattern
-  )
-
-  ## Multipe + existing:
-  inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
-  expect_identical(inst$delete("a/b/c", "x/y/z"),
-    list("a/b/c" = TRUE, "x/y/z" = TRUE))
-  expect_identical(inst$read(),
-    list(
-      a = list(b = structure(list(), names = character())),
-      x = list(y = structure(list(), names = character()))
-    )
-  )
-
-  ## Multipe + with non-existing:
-  inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
-
-  target <- list("a/b/c" = TRUE, "A/B/C" = FALSE)
-  expect_identical(inst$delete("a/b/c", "A/B/C"), target)
-  expect_identical(inst$read(),
-    list(
-      a = list(b = structure(list(), names = character())),
-      x = list(y = list(z = 2))
-    )
-  )
-
-  inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
-  pattern <- gsub("\\.", "\\\\.", paste0(class(inst)[1],
-    ": delete: invalid: A/B/C"))
-  expect_message(
-    expect_identical(inst$delete("a/b/c", "A/B/C", strict = 1), target),
-    pattern
-  )
-  inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
-  expect_warning(
-    expect_identical(inst$delete("a/b/c", "A/B/C", strict = 2), target),
-    pattern
-  )
-  inst <- Crud$new()
-  inst$init("a/b/c" = 1, "x/y/z" = 2)
-  expect_error(
-    expect_identical(inst$delete("a/b/c", "A/B/C", strict = 3), target),
-    pattern
+  expect_identical(
+    inst$delete("a", "b/foo", "hello", list("c", "d/foo", "world")),
+    list("a" = TRUE, "b/foo" = TRUE, "hello" = FALSE, "c" = TRUE,
+      "d/foo" = TRUE, "world" = FALSE)
   )
 })
 

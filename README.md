@@ -130,15 +130,57 @@ inst$reset("hard")
 inst$read()
 ```
 
+## Flexible input format
+
+Also see vignette [Handling threedots input in batch scenarios](https://github.com/rappster/crudr/tree/master/vignettes/gist_threedots.Rmd) (rendered versions available in R via `vignette("gist_threedots", package = "crudr")`)
+
+```
+## Instantiate + init //
+inst <- Crud$new()
+values <- list(e = 1, "e/foo/bar" = 1)
+inst$init(a = 1, "b/foo/bar" = 1, list(c = 1, "d/foo/bar" = 1), values)
+
+## Has //
+inst$has("a", "b/foo", "c", "d/foo/bar", "e", "e/foo", "x", "b/foobar", "d/foo/bar/something")
+values <- list("e", "e/foo")
+inst$has("a", "b/foo", list("c", "d/foo/bar"), values, "x", "b/foobar", "d/foo/bar/something")
+
+## Read //
+inst$read("a", "b/foo", "c", "d/foo/bar", "e", "e/foo", "x", "b/foobar", "d/foo/bar/something")
+values <- list("e", "e/foo")
+inst$read("a", "b/foo", list("c", "d/foo/bar"), values, "x", "b/foobar", "d/foo/bar/something")
+
+## Create //
+values <- list("z" = 1, "zz/foo/bar" = 1)
+inst$create("x" = 1, "xx/foo/bar" = 1, list("y" = 1, "yy/foo/bar" = 1), values)
+inst$read()
+
+## Update //
+values <- list("z" = 10, "zz/foo/bar" = 10)
+inst$update("x" = 10, "xx/foo/bar" = 10, list("y" = 10, "yy/foo/bar" = 10), values)
+inst$read()
+
+## Delete //
+values <- list("z", "zz/foo/bar")
+inst$delete("x", "xx/foo/bar", list("y", "yy/foo/bar"), values)
+inst$read()
+
+## Reset //
+inst$read()
+inst$reset()
+inst$read()
+inst$reset("hard")
+inst$read()
+```
+
 ## Further examples
 
 See vignettes: 
 
-- [Introduction](https://github.com/rappster/crudr/tree/master/vignettes/introduction.Rmd):
-    Run `vignette("introduction", package = "crudr")`
+- [Introduction](https://github.com/rappster/crudr/tree/master/vignettes/introduction.Rmd) (rendered versions available in R via `vignette("introduction", package = "crudr")`)
   
-- [Implementation for package `settings`](https://github.com/rappster/crudr/tree/master/vignettes/impl_settings_package.Rmd):
-    Run `vignette("impl_settings_package", package = "crudr")`
+- [Implementation for package `settings`](https://github.com/rappster/crudr/tree/master/vignettes/impl_settings_package.Rmd) (rendered versions available in R via `vignette("impl_settings_package", package = "crudr")`)
     
-- [Nestedness](https://github.com/rappster/crudr/tree/master/vignettes/nestedness.Rmd):
-    Run `vignette("nestedness", package = "crudr")`    
+- [Nestedness](https://github.com/rappster/crudr/tree/master/vignettes/nestedness.Rmd) (rendered versions available in R via `vignette("nestedness", package = "crudr")`)    
+
+- [Handling threedots input in batch scenarios](https://github.com/rappster/crudr/tree/master/vignettes/gist_threedots.Rmd) (rendered versions available in R via `vignette("gist_threedots", package = "crudr")`)

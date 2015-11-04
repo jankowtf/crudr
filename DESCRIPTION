@@ -1,7 +1,7 @@
 Package: crudr
 Type: Package
 Title: Interfaces for CRUD operations
-Version: 0.1.6
+Version: 0.2.0
 Date: 2015-11-04
 Authors@R: person("Janko", "Thyson", email = "janko.thyson@rappster.de",
     role = c("aut", "cre"))
@@ -28,5 +28,6 @@ Collate:
     'crudr-package.r'
     'implementation_classes.R'
     'private.R'
+    'threedots.R'
     'uml.R'
 RoxygenNote: 5.0.0

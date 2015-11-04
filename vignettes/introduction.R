@@ -76,35 +76,44 @@ uml_file <- crudr:::plantuml3(
 #  inst <- Crud$new()
 
 ## ---- eval = run---------------------------------------------------------
-#  inst$init(a = 1, b = 2)
+#  inst$init(a = 1, b = 2, "c/foo/bar" = 3, list(d = 4, "e/foo/bar" = 5))
 
 ## ---- eval = run---------------------------------------------------------
 #  inst$has("a")
-#  inst$has("b")
+#  inst$has("c/foo")
 #  inst$has("a", "b")
+#  inst$has("a", "e/foo/bar")
 #  
 #  inst$has("c")
-#  inst$has("a", "c")
+#  inst$has("a", "c", "c/bar")
 
 ## ---- eval = run---------------------------------------------------------
-#  inst$create(c = 3)
-#  inst$create(d = 4, f = 5)
-#  inst$read()
+#  inst$create(f = TRUE)
+#  inst$create(g = TRUE, h = letters[1:3])
+#  inst$create("i/foo" = 1, "c/foo/bar/new" = 1)
+#  ## TODO 2015-11-04: review behavior for preserving values; turning everything
+#  ## into a list would probably be nicer as would happen when calling
+#  ## `inst$create("i/foo" = 1, "c/foo/bar/new/something" = 1)`
+#  as.list(inst$getMain(), sorted = TRUE)
 #  
-#  try(inst$create(c = 30))
-#  inst$read()
+#  (inst$create(c = 30, "c/foo" = 30))
 #  ## --> c already existed with value = 3
+#  as.list(inst$getMain(), sorted = TRUE)
 #  inst$create(c = 30, strict = 1)
 #  try(inst$create(c = 30, strict = 2))
 #  try(inst$create(c = 30, strict = 3))
-#  inst$create(c = 30, overwrite = TRUE)
-#  inst$read()
+#  
+#  ## Overwrite //
+#  inst$create(c = 30, "c/foo" = 30, overwrite = TRUE)
+#  ## TODO 2015-11-04: review behavior for preserving values; turning everything
+#  ## into a list would probably be nicer
+#  as.list(inst$getMain(), sorted = TRUE)
 #  ## --> c overwritten
 
 ## ---- eval = run---------------------------------------------------------
 #  inst$read()
 #  inst$read("a")
-#  inst$read("a", "b")
+#  inst$read("a", "b", "c/foo")
 #  
 #  inst$read("a", "b", "x")
 #  try(inst$read("a", "b", "x", strict = 3))

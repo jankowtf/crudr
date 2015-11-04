@@ -100,35 +100,45 @@ inst$<span class="kw">getMain</span>()$b</code></pre>
 </div>
 <div id="init" class="section level3">
 <h3>Init</h3>
-<p>Provide initial values:</p>
-<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">init</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>)</code></pre>
+<p>Provide initial values.</p>
+<p>Note the flexible format by which you can provide input.</p>
+<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">init</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>, <span class="st">&quot;c/foo/bar&quot;</span> =<span class="st"> </span><span class="dv">3</span>, <span class="kw">list</span>(<span class="dt">d =</span> <span class="dv">4</span>, <span class="st">&quot;e/foo/bar&quot;</span> =<span class="st"> </span><span class="dv">5</span>))</code></pre>
 </div>
 <div id="has" class="section level3">
 <h3>Has</h3>
 <p>Check if values exist based on one or multiple keys:</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>)
-inst$<span class="kw">has</span>(<span class="st">&quot;b&quot;</span>)
+inst$<span class="kw">has</span>(<span class="st">&quot;c/foo&quot;</span>)
 inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
+inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;e/foo/bar&quot;</span>)
 
 inst$<span class="kw">has</span>(<span class="st">&quot;c&quot;</span>)
-inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;c&quot;</span>)</code></pre>
+inst$<span class="kw">has</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;c/bar&quot;</span>)</code></pre>
 </div>
 <div id="create" class="section level3">
 <h3>Create</h3>
 <p>Create one or multiple key-value pairs. Takes into consideration existing key-value pairs which, by default, are not overwritten. Overwrites need to be explicitly authorized by <code>overwrite = TRUE</code>.</p>
 <p>Note the different levels of strictness that can be applied. This is something that most methods support.</p>
-<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">3</span>)
-inst$<span class="kw">create</span>(<span class="dt">d =</span> <span class="dv">4</span>, <span class="dt">f =</span> <span class="dv">5</span>)
-inst$<span class="kw">read</span>()
+<pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">create</span>(<span class="dt">f =</span> <span class="ot">TRUE</span>)
+inst$<span class="kw">create</span>(<span class="dt">g =</span> <span class="ot">TRUE</span>, <span class="dt">h =</span> letters[<span class="dv">1</span>:<span class="dv">3</span>])
+inst$<span class="kw">create</span>(<span class="st">&quot;i/foo&quot;</span> =<span class="st"> </span><span class="dv">1</span>, <span class="st">&quot;c/foo/bar/new&quot;</span> =<span class="st"> </span><span class="dv">1</span>)
+## TODO 2015-11-04: review behavior for preserving values; turning everything
+## into a list would probably be nicer as would happen when calling
+## `inst$create(&quot;i/foo&quot; = 1, &quot;c/foo/bar/new/something&quot; = 1)`
+<span class="kw">as.list</span>(inst$<span class="kw">getMain</span>(), <span class="dt">sorted =</span> <span class="ot">TRUE</span>)
 
-<span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>))
-inst$<span class="kw">read</span>()
+(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="st">&quot;c/foo&quot;</span> =<span class="st"> </span><span class="dv">30</span>))
 ## --&gt; c already existed with value = 3
+<span class="kw">as.list</span>(inst$<span class="kw">getMain</span>(), <span class="dt">sorted =</span> <span class="ot">TRUE</span>)
 inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">1</span>)
 <span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">2</span>))
 <span class="kw">try</span>(inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">strict =</span> <span class="dv">3</span>))
-inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)
-inst$<span class="kw">read</span>()
+
+## Overwrite //
+inst$<span class="kw">create</span>(<span class="dt">c =</span> <span class="dv">30</span>, <span class="st">&quot;c/foo&quot;</span> =<span class="st"> </span><span class="dv">30</span>, <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)
+## TODO 2015-11-04: review behavior for preserving values; turning everything
+## into a list would probably be nicer
+<span class="kw">as.list</span>(inst$<span class="kw">getMain</span>(), <span class="dt">sorted =</span> <span class="ot">TRUE</span>)
 ## --&gt; c overwritten</code></pre>
 </div>
 <div id="read" class="section level3">
@@ -137,7 +147,7 @@ inst$<span class="kw">read</span>()
 <p>Strictness levels <code>0</code> through <code>3</code> apply.</p>
 <pre class="sourceCode r"><code class="sourceCode r">inst$<span class="kw">read</span>()
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>)
-inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)
+inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c/foo&quot;</span>)
 
 inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>)
 <span class="kw">try</span>(inst$<span class="kw">read</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;x&quot;</span>, <span class="dt">strict =</span> <span class="dv">3</span>))</code></pre>
