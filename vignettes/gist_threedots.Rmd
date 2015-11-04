@@ -1,0 +1,151 @@
+---
+title: "Handling threedots input in batch scenarios"
+author: "Janko Thyson"
+date: "4. November 2015"
+output: html_document
+---
+
+# Problem
+
+Function that take their main arguments via `...` are great for interactive use, but sometimes a bit inconvenient when you want to do stuff in a batch manner.
+
+## Simple example
+
+Interactive mode:
+
+```{r}
+library(settings)
+x <- options_manager(a = 1, b = 2)
+x()
+```
+
+Batch mode:
+
+Suppose that `values` has been created by another upstream function and that you would like to feed that to `options_manager`.
+
+```{r}
+values <- list(a = 1, b = 2)
+x <- options_manager(values)
+x()
+```
+
+Possibly not quite the value we would expect.
+
+# Solution
+
+## Simple draft 
+
+The key is to implement a function that handles values passed via `...`.
+
+Let's start out with a simple example:
+
+```{r}
+foo <- function(...) {
+  values <- list(...)
+  nms <- names(values)
+  if (is.null(nms)) {
+    ## --> wrapped into list for batch setting
+    do.call(options_manager, unlist(values, recursive = FALSE))
+  } else if (any(idx <- nms == "")) {
+    ## --> mixed
+    values <- c(values[!idx], unlist(values[idx], recursive = FALSE))
+    do.call(options_manager, values[sort(names(values))])
+  } else {
+    ## --> regular
+    options_manager(...)
+  }
+}
+```
+
+That gives you the desired result no matter in what format you provide your input to `settings::options_manager`
+
+```{r}
+opts <- foo(a = 1, b = 2)
+opts()
+opts <- foo(list(a = 1, b = 2))
+opts()
+opts <- foo(list(a = 1), b = 2)
+opts()
+```
+
+## Generic proposal
+
+This draft is a bit more generic.
+
+- `handleThreedots` takes care of transforming values that came in via `...` so they are in the typical format that downstream functions taking their main input via `...` would expect.
+
+- `withHandledThreedots` is simply a generic wrapper that combines calls to `handleThreedots` and the actual target function - which would be `settings::options_manager` in our example case.
+
+```{r}
+handleThreedots <- function(...) {
+  values <- list(...)
+  nms <- names(values)
+  if (is.null(nms)) {
+    ## --> wrapped into list for batch setting
+    unlist(values, recursive = FALSE)
+  } else if (any(idx <- nms == "")) {
+    ## --> mixed
+    c(values[!idx], unlist(values[idx], recursive = FALSE))
+    ## --> note that I did not introduce any sorting as before 
+    ##     in order to not slow things down additionally 
+  } else {
+    ## --> regular
+    values
+  }
+}
+withHandledThreedots <- function(..., fun) {
+  do.call(fun, handleThreedots(...))
+}
+```
+
+Examples with only `handleThreedots`
+
+```{r}
+handleThreedots(a = 1, b = 2, c = 3, d = 4)
+handleThreedots(list(a = 1, b = 2), list(c = 3, d = 4))
+handleThreedots(list(a = 1), b = 2, list(c = 3), d = 4)
+```
+
+Actual example:
+
+```{r}
+res <- withHandledThreedots(a = 1, b = 2, c = 3, d = 4, 
+  fun = options_manager)
+res()
+res <- withHandledThreedots(list(a = 1, b = 2), list(c = 3, d = 4),
+  fun = options_manager)
+res()
+res <- withHandledThreedots(list(a = 1), b = 2, list(c = 3), d = 4,
+  fun = options_manager)
+res()
+```
+
+This approach can also handle additional arguments that `fun` might take:
+
+```{r}
+res <- withHandledThreedots(a = 1, b = 2, c = 3, d = 4,
+  fun = options_manager, .allowed = list(a = inrange(1, 2)))
+res()
+try(res(a = 3))
+res <- withHandledThreedots(list(a = 1, b = 2), list(c = 3, d = 4),
+  fun = options_manager, .allowed = list(a = inrange(1, 2)))
+res()
+try(res(a = 3))
+res <- withHandledThreedots(list(a = 1), b = 2, list(c = 3), d = 4,
+  fun = options_manager, .allowed = list(a = inrange(1, 2)))
+res()
+try(res(a = 3))
+```
+
+Just to make sure that the additional argument `.allowed` of `settings::options_manager` was simply not shown because its name starts with a dot
+
+```{r}
+foo <- function(..., special = FALSE) {
+  if (special) {
+    message("hello world!")
+  }
+  list(...)
+}
+withHandledThreedots(a = 1, b = 2, c = 3, d = 4, fun = foo)
+withHandledThreedots(a = 1, b = 2, c = 3, d = 4, fun = foo, special = TRUE)
+```
