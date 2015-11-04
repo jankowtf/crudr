@@ -109,6 +109,7 @@ createCrudExpression.default <- function(
   inst,
   id = character(),
   value = NULL,
+  # value,
   name_obj = "inst",
   name_value = "value",
   as_name_obj = TRUE,
@@ -138,7 +139,11 @@ createCrudExpression.default <- function(
   if (!missing(value)) {
     allow_null <- TRUE
   }
-  if (is.null(value) && !affect_branch) {
+#   } else {
+#     value <- NULL
+#     ## TODO 2015-11-04: investigate why this is necessary
+#   }
+  if (is.null(value) && allow_null && !affect_branch) {
     value <- structure(list(), names = character())
   }
 
@@ -154,6 +159,7 @@ createCrudExpression.default <- function(
       expr <- substitute(FUN(X, INDEX),
         list(FUN = as.name('[['), X = name_obj,
           INDEX = id))
+      print(expr)
     } else {
       expr <- substitute(FUN(X, INDEX) <- VALUE,
         list(FUN = as.name('[['), X = name_obj, INDEX = id,
