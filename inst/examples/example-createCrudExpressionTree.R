@@ -5,7 +5,9 @@ inst = list()
 
 # No assignment value -----------------------------------------------------
 
-createCrudExpressionTree(inst, c("a", "b", "c"))
+tree <- createCrudExpressionTree(inst, c("a", "b", "c"))
+sapply(tree, names)
+
 createCrudExpressionTree(inst, c("a", "b", "c"), name_obj = "x")
 createCrudExpressionTree(inst, c("a", "b", "c"), as_name_obj = FALSE)
 

@@ -85,8 +85,18 @@ createCrudExpression <- function(inst, ...) {
 #' @param use_tree \code{\link[base]{logical}}.
 #'  Use expression tree as returned by
 #'    \code{\link[crudr]{createCrudExpressionTree}}.
+#' @param allow_null \code{\link[base]{logical}}.
+#'  Allows \code{value = NULL}. Useful for deleting values.
 #' @template threedots
-#' @return \code{\link[base]{expression}} or evaluated get expression
+#' @param affect_branch \code{\link[base]{logical}}.
+#'  Only relevant when \code{value = NULL} in which case a value will be
+#'  deleted. Unless we use \code{use_tree = TRUE}, the function has no means
+#'  of distinguishing the provided \code{id} belongs to a branch or a leaf in
+#'  the hierarchy. Setting this to \code{TRUE} will delete the entire branch
+#'  while \code{FALSE} will keep the branch with a value of
+#'  \code{structure(list(), names = character())}.
+#' @template threedots
+#' @return \code{\link[base]{expression}} or evaluated CRUD expression
 #'  if \code{evaluate = TRUE}. Exact value also depends on
 #'  \code{return_conventional}
 #'  (in interaction with \code{value} and \code{in_parent})
@@ -110,6 +120,8 @@ createCrudExpression.default <- function(
   strict = 0:3,
   fail_safe = FALSE,
   use_tree = FALSE,
+  allow_null = FALSE,
+  affect_branch = FALSE,
   ...
 ) {
   envir <- if (!in_parent) {
@@ -119,8 +131,15 @@ createCrudExpression.default <- function(
   }
   sugar <- match.arg(sugar, c("[[", "$"))
 
+  ## Automatic convenvience overwrites
   if (in_parent) {
     evaluate <- TRUE
+  }
+  if (!missing(value)) {
+    allow_null <- TRUE
+  }
+  if (is.null(value) && !affect_branch) {
+    value <- structure(list(), names = character())
   }
 
   ## Ensure vectorized index //
@@ -130,7 +149,8 @@ createCrudExpression.default <- function(
   name_value <- if (as_name_value) as.name(name_value) else value
 
   if (sugar == "[[") {
-    if (is.null(value)) {
+    # if (is.null(value)) {
+    if (is.null(value) && !allow_null) {
       expr <- substitute(FUN(X, INDEX),
         list(FUN = as.name('[['), X = name_obj,
           INDEX = id))
@@ -159,15 +179,16 @@ createCrudExpression.default <- function(
     expr
   }
   if (evaluate) {
-    if (is.null(value)) {
-      ## --> get scenario
+    # if (is.null(value)) {
+    if (is.null(value) && !allow_null) {
+      ## --> read scenario
       out <- if (!fail_safe) {
         eval(expr, envir = envir)
       } else {
         try(eval(expr, envir = envir), silent = TRUE)
       }
     } else {
-      ## --> set scenario
+      ## --> create scenario
       if (!use_tree) {
         out <- try(eval(expr, envir = envir), silent = TRUE)
       } else {
@@ -184,18 +205,18 @@ createCrudExpression.default <- function(
           name_value = name_value,
           fail_safe = TRUE
         )
-        exists_idx <- applyCrudExpressionTree(tree, "exists",
+        exists_idx <- applyCrudExpressionTree(tree, "has",
           fail_safe = TRUE)
-        # exists_idx <- applyCrudExpressionTree(tree, "get")
+        # exists_idx <- applyCrudExpressionTree(tree, "read")
         # print(exists_idx)
         missing_idx <- sapply(exists_idx, function(ii) {
-          ## If via type = "exists":
+          ## If via type = "has":
           identical(ii, FALSE) || inherits(ii, "try-error")
-          ## If via type = "get":
+          ## If via type = "read":
           # is.null(ii) || inherits(ii, "try-error")
         })
         tree <- tree[missing_idx]
-        out <- applyCrudExpressionTree(tree, "set", envir = envir)
+        out <- applyCrudExpressionTree(tree, "create", envir = envir)
         out <- out[[length(out)]]
       }
 
@@ -388,14 +409,14 @@ createCrudExpressionTree.default <- function(
       # list()
       list()
     } else {
-#       if (wrap_in_list) {
-#         list(name_value)
-#       } else {
-        name_value
+      #       if (wrap_in_list) {
+      #         list(name_value)
+      #       } else {
+      name_value
       # }
     }
-    tmp <- list(
-      exists = if (!fail_safe) {
+    expr_list <- list(
+      has = if (!fail_safe) {
         substitute(
           FUN(X, WHERE, inherits = FALSE),
           list(
@@ -414,7 +435,7 @@ createCrudExpressionTree.default <- function(
           )
         )
       },
-      get = if (!fail_safe) {
+      read = if (!fail_safe) {
         substitute(
           FUN(X, INDEX),
           list(
@@ -433,7 +454,7 @@ createCrudExpressionTree.default <- function(
           )
         )
       },
-      set = if (!is.null(value)) {
+      create = if (!is.null(value)) {
         if (!fail_safe) {
           if (ii < length(id)) {
             substitute(
@@ -495,9 +516,29 @@ createCrudExpressionTree.default <- function(
         }
       } else {
         NULL
+      },
+      delete = if (!fail_safe) {
+        substitute(
+          FUN(X, INDEX) <- NULL,
+          list(
+            FUN = as.name('[['),
+            X = name_obj,
+            INDEX = this
+          )
+        )
+      } else {
+        substitute(
+          try(FUN(X, INDEX) <- NULL, silent = TRUE),
+          list(
+            FUN = as.name('[['),
+            X = name_obj,
+            INDEX = this
+          )
+        )
       }
     )
-    tmp
+    expr_list$update <- expr_list$create
+    expr_list
   })
   names(out) <- sapply(1:length(id), function(ii) paste(id[1:ii], collapse = "/"))
   out
@@ -557,13 +598,16 @@ applyCrudExpressionTree <- function(inst, ...) {
 #' @export
 applyCrudExpressionTree.default <- function(
   inst,
-  type = c("exists", "get", "set"),
+  type = c("has", "create", "read", "update", "delete"),
   envir = parent.frame(),
   fail_safe = FALSE,
   ...
 ) {
   # print(ls(envir))
-  type <- match.arg(type, c("exists", "get", "set"))
+  type <- match.arg(type, c("has", "create", "read", "update", "delete"))
+  if (type == "delete") {
+    inst <- rev(inst)
+  }
   # ii = inst[[2]]
   lapply(inst, function(ii) {
     if (!fail_safe) {

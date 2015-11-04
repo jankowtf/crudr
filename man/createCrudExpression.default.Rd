@@ -71,7 +71,7 @@ Use expression tree as returned by
 \item{...}{Further arguments to be passed to subsequent functions/methods.}
 }
 \value{
-\code{\link[base]{expression}} or evaluated get expression
+\code{\link[base]{expression}} or evaluated CRUD expression
  if \code{evaluate = TRUE}. Exact value also depends on
  \code{return_conventional}
  (in interaction with \code{value} and \code{in_parent})

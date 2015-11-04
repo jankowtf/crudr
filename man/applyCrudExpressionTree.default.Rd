@@ -4,8 +4,9 @@
 \alias{applyCrudExpressionTree.default}
 \title{Apply access expression tree}
 \usage{
-\method{applyCrudExpressionTree}{default}(inst, type = c("exists", "get",
-  "set"), envir = parent.frame(), fail_safe = FALSE, ...)
+\method{applyCrudExpressionTree}{default}(inst, type = c("has", "create",
+  "read", "update", "delete"), envir = parent.frame(), fail_safe = FALSE,
+  ...)
 }
 \arguments{
 \item{inst}{\code{\link[base]{list}}.
@@ -37,9 +38,9 @@ inst = list(a = list(b = 1))
 tree <- createCrudExpressionTree(inst, c("a", "b", "c"),
   value = 1, fail_safe = TRUE)
 
-applyCrudExpressionTree(tree, "exists")
-applyCrudExpressionTree(tree, "get")
-applyCrudExpressionTree(tree, "set")
+applyCrudExpressionTree(tree, "has")
+applyCrudExpressionTree(tree, "read")
+applyCrudExpressionTree(tree, "create")
 
 inst
 }
